@@ -100,7 +100,7 @@ quantile(r1$aco2, na.rm = TRUE)
 # low outliers are below 324.4518
 # high outliers are above 596.1012
 
-quantile(r1$CO2_LiCor, na.rm = TRUE)
+quantile(r1$eco2, na.rm = TRUE)
 # 0%  25%    50%   75%   100% 
 # 5   620   645    678   1023  
 # IQR = 87
@@ -115,7 +115,7 @@ quantile(r2$aco2, na.rm = TRUE)
 # low outliers are below 329.132
 # high outliers are above 549.526
 
-quantile(r2$CO2_LiCor, na.rm = TRUE)
+quantile(r2$eco2, na.rm = TRUE)
 # 0%    25%     50%   75%   100% 
 # 0     607     640   675   1023  
 # IQR = 102
@@ -136,11 +136,12 @@ axis(1, labels = c('ambient', 'elevated'), at = c(1,2))
 axis(2)
 title('Round 1')
 
-boxplot(as.numeric(r2$CO2_LiCor), as.numeric(r2$aco2), 
+boxplot(as.numeric(r2$eco2), as.numeric(r2$aco2), 
         outline = FALSE, col= c('#69a1ff', '#becbca'), 
         axes=FALSE, ann = FALSE, 
         ylim = c(300,800))
 axis(1, labels = c('elevated', 'ambient'), at = c(1,2))
 title('Round 2')
 
+dev.off()
 
