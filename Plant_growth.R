@@ -164,51 +164,36 @@ plot(simulationOutput <- simulateResiduals(fittedModel=m.D1.log, plot =F))
 anova(m.D1, m.D1.log) # no difference in model fit, but AIC lower for ln-transformed data
 summary(m.D1.log) # No significant difference by CO2 level, only week
 
-#######
 ## Lacy Phacelia
-######
 h.LP <- height %>% filter(Plant == "LP")
 
 m.LP1 <- lmer(Height_cm ~ CO2 + Round + week + (1|Chamber), data = h.LP, REML=F)
 plot(simulationOutput <- simulateResiduals(fittedModel=m.LP1, plot =F))
 m.LP1.log <- lmer(log(Height_cm) ~ CO2 + Round + week + (1|Chamber), data = h.LP, REML=F)
 plot(simulationOutput <- simulateResiduals(fittedModel=m.LP1.log, plot =F))
-summary(m.LP1)
-summary(m.LP1.log)
-anova(m.LP1,m.LP1.log) # same as all others
-AIC(m.LP1) # 6406.778
-# no significant effect of CO2 but it's close. 
+anova(m.LP1,m.LP1.log) # = explanation, lower AIC when ln-transformed
+summary(m.LP1.log) # no significant effect of CO2 
 
-#########
 ## Nasturtium
-##########
 h.N <- height %>% filter(Plant == "N")
 
 m.N1 <- lmer(Height_cm ~ CO2 + Round + week + (1|Chamber), data = h.N, REML=F)
 plot(simulationOutput <- simulateResiduals(fittedModel=m.N1, plot =F))
 m.N1.log <- lmer(log(Height_cm) ~ CO2 + Round + week + (1|Chamber), data = h.N, REML=F)
 plot(simulationOutput <- simulateResiduals(fittedModel=m.N1.log, plot =F))
-summary(m.N1)
-summary(m.N1.log)
-anova(m.N1, m.N1.log)
-AIC(m.N1) # 3245.996
-# No significant difference by CO2 level
+anova(m.N1, m.N1.log) # = explanation, lower AIC when ln-transformed
+summary(m.N1.log)# No significant difference by CO2 level
 
-######
-## PP
-######
+## Partridge pea
 h.PP <- height %>% filter(Plant == "PP")
-h.PP <- h.PP %>% filter(Round == "1")
+h.PP <- h.PP %>% filter(Round == "1") # high mortality in round 2, did not continue w/this plant in round 2
 
 m.PP1 <- lmer(Height_cm ~ CO2+week + (1|Chamber), data = h.PP, REML=F)
 plot(simulationOutput <- simulateResiduals(fittedModel=m.PP1, plot =F))
 m.PP1.log <- lmer(log(Height_cm) ~ CO2 + week + (1|Chamber), data = h.PP, REML=F)
 plot(simulationOutput <- simulateResiduals(fittedModel=m.PP1.log, plot =F))
-summary(m.PP1)
-summary(m.PP1.log)
-anova(m.PP1, m.PP1.log)
-AIC(m.PP1) # 1754.496
-# everything is significant
+anova(m.PP1, m.PP1.log) # = explanation, lower AIC when ln-transformed
+summary(m.PP1.log) # only week is significant
 
 ########
 ## SA
