@@ -100,104 +100,69 @@ ggplot(height, aes(x=datenum, y = Height_cm, color = CO2))+
              labeller = labeller(Plant = plants.height),
              ncol = 3)
 
+# convert date since planting to experimental week
 height$week <- height$datenum/7
 
-# total evidence model
-hist(height$Height_cm)
-hist(log(height$Height_cm))
-m.1 <- lmer(log(Height_cm) ~ CO2*Plant + Round + week + (1|Chamber), data = height, REML=F)
+# full model
+m.1 <- lmer(Height_cm ~ CO2*Plant + Round + week + (1|Chamber), data = height, REML=F)
 plot(simulationOutput <- simulateResiduals(fittedModel=m.1, plot =F))
 summary(m.1)
 anova(m.1)
-m.2 <- lmer(log(Height_cm) ~ CO2*Plant + week + (1|Chamber), data = height, REML=F)
+# try ln-transforming data to improve normality
+m.2 <- lmer(log(Height_cm) ~ CO2*Plant + Round + week + (1|Chamber), data = height, REML=F)
 plot(simulationOutput <- simulateResiduals(fittedModel=m.2, plot =F))
-anova(m.1, m.2)
-anova(m.2)
-# much better fit after log-adjusted
+anova(m.1, m.2) # equivalent model fit, lower AIC in ln-transformed model - go with that one. 
+anova(m.2) 
 
-plotResiduals(simulationOutput, form = height$Plant)
-
-# CO2 on its own, but significant interaction between CO2 and plant species, and plant species 
-# on its own, so compare each plant species separately. 
-
-m.1 <- lmer(Height_cm ~ CO2*Plant + Round + week + (1|Chamber), data = height, REML=F)
-plot(simulationOutput <- simulateResiduals(fittedModel=m.1, plot =F))
-
-
-#########
+# compare each individual plant species separately
 ## Borage
-#########
 h.B <- height %>% filter(Plant == "B")
-hist(log(h.B$Height_cm))
-h.B$log.h<-log(h.B$Height_cm)
-qqPlot(h.B$log.h)
 m.B1 <- lmer(Height_cm ~ CO2 + Round + week + (1|Chamber), data = h.B, REML=F)
 plot(simulationOutput <- simulateResiduals(fittedModel=m.B1, plot =F))
 
-m.B1.log <- lmer(log.h ~ CO2 + Round + week + (1|Chamber), data = h.B, REML=F)
+# try ln-transforming height data
+m.B1.log <- lmer(log(Height_cm) ~ CO2 + Round + week + (1|Chamber), data = h.B, REML=F)
 plot(simulationOutput <- simulateResiduals(fittedModel=m.B1.log, plot =F))
-summary(m.B1.log)
 
 anova(m.B1, m.B1.log) # no difference, but much lower AIC for m.B1.log
+summary(m.B1.log) # No significant difference by CO2 
 
-summary(m.B1)
-anova(m.B1)
-AIC(m.B1) # 4260.1
-# No significant difference by CO2 
-
-########
 ## Buckwheat
-########
 h.BW <- height %>% filter(Plant == "BW")
-
 m.BW1 <- lmer(Height_cm ~ CO2 + Round + week + (1|Chamber), data = h.BW, REML=F)
 plot(simulationOutput <- simulateResiduals(fittedModel=m.BW1, plot =F))
+
+# try ln-transforming height data
 m.BW1.log <- lmer(log(Height_cm) ~ CO2 + Round + week + (1|Chamber), data = h.BW, REML=F)
 plot(simulationOutput <- simulateResiduals(fittedModel=m.BW1.log, plot =F))
-anova(m.BW1, m.BW1.log) # no difference but AIC is lower for log-transformed data
-summary(m.BW1.log)
-summary(m.BW1)
-anova(m.BW1)
-AIC(m.BW1) # 5946.4 
-# CO2 is significant
+anova(m.BW1, m.BW1.log) # no difference but AIC is lower for ln-transformed data
+summary(m.BW1.log) # CO2 is significant
 
-#########
 ## Clover
-#########
 h.C <- height %>% filter(Plant == "C")
-hist(log(h.C$Height_cm))
 m.C1 <- lmer(Height_cm ~ CO2 + Round + week + (1|Chamber), data = h.C, REML=F)
 plot(simulationOutput <- simulateResiduals(fittedModel=m.C1, plot =F))
 m.C1.log <- lmer(log(Height_cm) ~ CO2 + Round + week + (1|Chamber), data = h.C, REML=F)
 plot(simulationOutput <- simulateResiduals(fittedModel=m.C1.log, plot =F))
 anova(m.C1, m.C1.log) # = explanation, lower AIC w/log-transformed
-summary(m.C1.log)
+summary(m.C1.log) # no significant effect of round or of CO2 
 
+# what if we remove round from the model
 m.C1.log1 <- lmer(log(Height_cm) ~ CO2 + week + (1|Chamber), data = h.C, REML=F)
 plot(simulationOutput <- simulateResiduals(fittedModel=m.C1.log1, plot =F))
-anova(m.C1.log, m.C1.log1) # = explanation, lower AIC w/log-transformed
-summary(m.C1.log1)
+anova(m.C1.log, m.C1.log1) # = explanation, lower AIC w/o round
+summary(m.C1.log1) # CO2 not significant 
 
-summary(m.C1)
-anova(m.C1)
-AIC(m.C1) # 5493.4 
-# CO2 not significant 
-
-########
 ## Dandelion
-########
 h.D <- height %>% filter(Plant == "D")
-h.D <- h.D %>% filter(Round == "1")
+h.D <- h.D %>% filter(Round == "1") # Remove round 2 dandelion starts, flowering took took too long to continue in round 2
 
 m.D1 <- lmer(Height_cm ~ CO2 + week + (1|Chamber), data = h.D, REML=F)
 plot(simulationOutput <- simulateResiduals(fittedModel=m.D1, plot =F))
 m.D1.log <- lmer(log(Height_cm) ~ CO2 + week + (1|Chamber), data = h.D, REML=F)
 plot(simulationOutput <- simulateResiduals(fittedModel=m.D1.log, plot =F))
-summary(m.D1)
-summary(m.D1.log)
-anova(m.D1, m.D1.log) # no difference in model fit, but AIC lower for log-transformed data
-AIC(m.D1) #2268.832
-# No significant difference by CO2 level, only week
+anova(m.D1, m.D1.log) # no difference in model fit, but AIC lower for ln-transformed data
+summary(m.D1.log) # No significant difference by CO2 level, only week
 
 #######
 ## Lacy Phacelia
