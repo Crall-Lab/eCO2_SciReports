@@ -387,37 +387,11 @@ ggplot(flowers, aes(x=week, y = Flower_no, color = CO2))+
              labeller = labeller(Plant = plants.flowers),
              ncol = 3)
 
-# full model 
-m.B1 <- lmer(Flower_no+1 ~ CO2*Plant + Round + datenum + (1|Chamber), data = flowers, REML=F)
-plot(simulationOutput <- simulateResiduals(fittedModel=m.B1, plot =F))
-summary(m.B1)
-anova(m.B1)
-
-#remove data where there are no flowers
-flowers1 <- flowers %>% filter(Flower_no != 0)
-hist(flowers1$Flower_no)
-qqPlot(log(flowers1$Flower_no))
-
-m.short <- glmer.nb(Flower_no ~ CO2*Plant + Round + datenum + (1|Chamber),
-                    data = flowers)
-plot(simulationOutput <- simulateResiduals(fittedModel=m.short, plot =F))
-car::Anova(m.short)
-
-# where zeros are included
-m.B2 <- glmer.nb(Flower_no ~ CO2*Plant + Round + datenum + (1|Chamber),
+# full model w/all plant species
+m.3 <- glmer.nb(Flower_no ~ CO2*Plant+Round+datenum+ (1|Chamber),
                  data = flowers)
 plot(simulationOutput <- simulateResiduals(fittedModel=m.B2, plot =F))
-#check for overdispersion
-overdisp_fun <- function(model) {
-  rdf <- df.residual(model)
-  rp <- residuals(model,type="pearson")
-  Pearson.chisq <- sum(rp^2)
-  prat <- Pearson.chisq/rdf
-  pval <- pchisq(Pearson.chisq, df=rdf, lower.tail=FALSE)
-  c(chisq=Pearson.chisq,ratio=prat,rdf=rdf,p=pval)
-}
-overdisp_fun(m.B2) # no over dispersion
-car::Anova(m.B2) # report this
+car::Anova(m.3) # report this
 
 ######
 ## Borage
