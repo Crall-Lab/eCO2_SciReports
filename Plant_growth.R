@@ -195,43 +195,25 @@ plot(simulationOutput <- simulateResiduals(fittedModel=m.PP1.log, plot =F))
 anova(m.PP1, m.PP1.log) # = explanation, lower AIC when ln-transformed
 summary(m.PP1.log) # only week is significant
 
-########
 ## SA
-#######
 h.SA <- height %>% filter(Plant == "SA")
 
 m.SA1 <- lmer(Height_cm ~ CO2 + Round+ week + (1|Chamber), data = h.SA, REML=F)
 plot(simulationOutput <- simulateResiduals(fittedModel=m.SA1, plot =F))
 m.SA1.log <- lmer(log(Height_cm) ~ CO2 + Round + week + (1|Chamber), data = h.SA, REML=F)
 plot(simulationOutput <- simulateResiduals(fittedModel=m.SA1.log, plot =F))
-summary(m.SA1)
-summary(m.SA1.log)
-anova(m.SA1, m.SA1.log)
-AIC(m.SA1) # 4477.474
-# No significant difference by CO2 level, only round and date
+anova(m.SA1, m.SA1.log) # = explanation, lower AIC when ln-transformed
+summary(m.SA1.log) # No significant difference by CO2 level, only round and date
 
-#########
 ## SF
-#########
 h.SF <- height %>% filter(Plant == "SF")
 
 m.SF1 <- lmer(Height_cm ~ CO2 + Round + week + (1|Chamber), data = h.SF, REML=F)
 plot(simulationOutput <- simulateResiduals(fittedModel=m.SF1, plot =F))
 m.SF1.log <- lmer(log(Height_cm) ~ CO2 + Round + week + (1|Chamber), data = h.SF, REML=F)
 plot(simulationOutput <- simulateResiduals(fittedModel=m.SF1.log, plot =F))
-summary(m.SF1)
-summary(m.SF1.log)
 anova(m.SF1, m.SF1.log)
-AIC(m.SF1) # 5843.401
-# No significant difference by CO2 level, only round and date
-
-# is it better w/o co2?
-m.SF2 <- lmer(Height_cm ~ Round*Date + (1|Chamber), data = h.SF, REML=F)
-summary(m.SF2)
-anova(m.SF2)
-AIC(m.SF2) # 5845.847
-
-anova(m.SF1, m.SF2) # full model is better. 
+summary(m.SF1.log) # No significant difference by CO2 level, only round and date
 
 ##############
 ## leaves
