@@ -221,36 +221,9 @@ summary(m.SF1.log) # No significant difference by CO2 level, only round and date
 
 # remove any plant, date, round, chambers w/o 3+ observations
 leaves <- leaves %>% group_by(Plant, Chamber, Round, Date) %>% filter(n()>2) %>% ungroup()
-
-## summarize and plot
-l.sum <- leaves %>% group_by(Plant, CO2, datenum) %>%
-  dplyr::summarise(
-    count = n(),
-    mean = mean(Leaf_no, na.rm = T),
-    sd = sd(Leaf_no, na.rm = T)
-  )
-l.sum$se <- l.sum$sd/sqrt(l.sum$count)
-
-l.sum$CO2 <- factor(l.sum$CO2, levels = c("0", "1"))
-l.sum <- l.sum %>% filter(datenum < 77)
-
-ggplot(l.sum, aes(x=datenum, y = mean, color = CO2))+
-  geom_point()+
-  geom_errorbar(aes(ymin=mean-se, ymax = mean+se), width=0.2)+
-  geom_line()+
-  theme_classic()+
-  theme(legend.position = "bottom")+
-  labs(y="Leaves +/- se", x = "Weeks since planting")+
-  scale_color_manual(values = c("grey","navyblue"), 
-                     labels = c("aCO2", "eCO2"),
-                     name = "Treatment")+
-  scale_x_continuous(breaks = c(14, 21, 28, 35, 42, 49, 56, 63, 70), 
-                     labels = c("2", "3", "4", "5", "6", "7", "8", "9", "10"))+
-  facet_wrap(vars(Plant), scales = "free",
-             labeller = labeller(Plant = plants),
-             ncol = 3)
-
 leaves$CO2 <- as.factor(leaves$CO2)
+plants.leaves <- c("Borage", "Buckwheat","Red Clover", "Dandelion", "Lacy Phacelia","Nasturtium","Partridge Pea", "Sweet Alyssum", "Sunflower")
+names(plants.leaves) <- c("B", "BW", "C", "D", "LP", "N", "PP", "SA", "SF")
 
 ggplot(leaves, aes(x=datenum, y = Leaf_no, color = CO2))+
   geom_point(aes(color = CO2), alpha = 0.4, size = 0.5)+
@@ -266,99 +239,45 @@ ggplot(leaves, aes(x=datenum, y = Leaf_no, color = CO2))+
                      labels = c("2", "3", "4", "5", "6", "7", "8", "9", "10"),
                      limits = c(14,70))+
   facet_wrap(vars(Plant), scales = "free",
-             labeller = labeller(Plant = plants),
-             ncol = 3)
-
-
-## summarize and plot
-l.sum <- leaves %>% group_by(Plant, Chamber, Round, Date) %>%
-  dplyr::summarise(
-    count = n(),
-    mean = mean(Leaf_no, na.rm = T),
-    sd = sd(Leaf_no, na.rm = T)
-  )
-l.sum$se <- l.sum$sd/sqrt(l.sum$count)
-
-plants <- c("Borage", "Buckwheat","Red Clover", "Dandelion", "Lacy Phacelia","Nasturtium","Partridge Pea", "Sweet Alyssum", "Sunflower")
-names(plants) <- c("B", "BW", "C", "D", "LP", "N", "PP", "SA", "SF")
-
-l.sum$Round <-as.factor(l.sum$Round)
-l.sum1 <- l.sum %>% filter(Round == "1")
-
-ggplot(l.sum1, aes(x=Date, y = mean, shape = Chamber))+
-  geom_point()+
-  geom_errorbar(aes(ymin=mean-se, ymax = mean+se), width=0.2)+
-  geom_line()+
-  theme_classic()+
-  theme(legend.position = "bottom")+
-  labs(y="Leaf # +/- se", x = "Date")+
-  scale_shape_manual(values = c(0,15,1,16), labels = c("60 - eCO2", "63 - eCO2", "62 - aCO2", "61 - aCO2"))+
-  facet_wrap(vars(Plant), scales = "free",
-             labeller = labeller(Plant = plants),
-             ncol = 3)
-
-l.sum2 <- l.sum %>% filter(Round == "2")
-
-ggplot(l.sum2, aes(x=Date, y = mean, shape = Chamber))+
-  geom_point()+
-  geom_errorbar(aes(ymin=mean-se, ymax = mean+se), width=0.2)+
-  geom_line()+
-  theme_classic()+
-  theme(legend.position = "bottom")+
-  labs(y="Height (cm) +/- se", x = "Date")+
-  scale_shape_manual(values = c(0,15,1,16), labels = c("60 - eCO2", "63 - eCO2", "62 - aCO2", "61 - aCO2"))+
-  facet_wrap(vars(Plant), scales = "free",
-             labeller = labeller(Plant = plants),
+             labeller = labeller(Plant = plants.leaves),
              ncol = 3)
 
 leaves$week <- leaves$datenum/7
 
+# full model looking at leaf number, week, plant species, and CO2 treament 
 m.B1 <- lmer(Leaf_no ~ CO2*Plant + Round + week + (1|Chamber), data = leaves, REML=F)
 plot(simulationOutput <- simulateResiduals(fittedModel=m.B1, plot =F))
+# see if ln-transformation is a better fit
 m.B1.log <- lmer(log(Leaf_no) ~ CO2*Plant + Round + week + (1|Chamber), data = leaves, REML=F)
 plot(simulationOutput <- simulateResiduals(fittedModel=m.B1.log, plot =F))
-qqPlot(log(leaves$Leaf_no+1))
-anova(m.B1, m.B1.log)
-summary(m.B1)
-anova(m.B1)
-anova(m.B1.log)
+anova(m.B1, m.B1.log) # yes, AIC lower after ln-transformation, = explanation of variation in data
+anova(m.B1.log) # CO2 not significant, but Plant species and Co2 x Plant species, so compare each species alone
 
-########
 ## Borage
-########
-h.B <- leaves %>% filter(Plant == "B")
+l.B <- leaves %>% filter(Plant == "B")
 
-m.B1 <- lmer(Leaf_no ~ CO2 + Round + week + (1|Chamber), data = h.B, REML=F)
+m.B1 <- lmer(Leaf_no ~ CO2 + Round + week + (1|Chamber), data = l.B, REML=F)
 plot(simulationOutput <- simulateResiduals(fittedModel=m.B1, plot =F))
-m.B1.log <- lmer(log(Leaf_no) ~ CO2 + Round + week + (1|Chamber), data = h.B, REML=F)
+m.B1.log <- lmer(log(Leaf_no) ~ CO2 + Round + week + (1|Chamber), data = l.B, REML=F)
 plot(simulationOutput <- simulateResiduals(fittedModel=m.B1.log, plot =F))
-summary(m.B1)
-summary(m.B1.log)
-anova(m.B1, m.B1.log)
-m.B1.log2 <- lmer(log(Leaf_no) ~CO2 + week + (1|Chamber), data = h.B, REML = F)
+anova(m.B1, m.B1.log) # equal explanation, lower AIC when ln-transformed
+summary(m.B1.log) # round not significant, compare w/o round
+
+m.B1.log2 <- lmer(log(Leaf_no) ~CO2 + week + (1|Chamber), data = l.B, REML = F)
 plot(simulationOutput <- simulateResiduals(fittedModel=m.B1.log2, plot =F))
-anova(m.B1.log, m.B1.log2)
-summary(m.B1.log2)
-AIC(m.B1) # 3407.825
-# No significant difference by CO2 level, only round and week
+anova(m.B1.log, m.B1.log2) # model slightly lower AIC w/o Round, go with that. 
+summary(m.B1.log2) # No significant difference by CO2 level, only week
 
-######
 ## Buckwheat
-######
-h.BW <- leaves %>% filter(Plant == "BW")
+l.BW <- leaves %>% filter(Plant == "BW")
 
-m.BW1 <- lmer(Leaf_no ~ CO2 + Round + week + (1|Chamber), data = h.BW, REML=F)
+m.BW1 <- lmer(Leaf_no ~ CO2 + Round + week + (1|Chamber), data = l.BW, REML=F)
 plot(simulationOutput <- simulateResiduals(fittedModel=m.BW1, plot =F))
-m.BW1.log <- lmer(log(Leaf_no) ~ CO2 + Round + week + (1|Chamber), data = h.BW, REML=F)
+m.BW1.log <- lmer(log(Leaf_no) ~ CO2 + Round + week + (1|Chamber), data = l.BW, REML=F)
 plot(simulationOutput <- simulateResiduals(fittedModel=m.BW1.log, plot =F))
-summary(m.BW1.log)
-summary(m.BW1)
-anova(m.BW1, m.BW1.log)
-anova(m.BW1.log)
-AIC(m.BW1) # 4312.423
-# only week is significant - no effect of CO2
+anova(m.BW1, m.BW1.log) # ln-transformed w/lower AIC
+summary(m.BW1.log) # no effect of CO2
 
-#########
 ## Clover
 #########
 h.C <- leaves %>% filter(Plant == "C")
