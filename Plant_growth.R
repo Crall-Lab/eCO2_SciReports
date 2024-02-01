@@ -195,7 +195,7 @@ plot(simulationOutput <- simulateResiduals(fittedModel=m.PP1.log, plot =F))
 anova(m.PP1, m.PP1.log) # = explanation, lower AIC when ln-transformed
 summary(m.PP1.log) # only week is significant
 
-## SA
+## Sweet alyssum
 h.SA <- height %>% filter(Plant == "SA")
 
 m.SA1 <- lmer(Height_cm ~ CO2 + Round+ week + (1|Chamber), data = h.SA, REML=F)
@@ -205,7 +205,7 @@ plot(simulationOutput <- simulateResiduals(fittedModel=m.SA1.log, plot =F))
 anova(m.SA1, m.SA1.log) # = explanation, lower AIC when ln-transformed
 summary(m.SA1.log) # No significant difference by CO2 level, only round and date
 
-## SF
+## Sunflower 
 h.SF <- height %>% filter(Plant == "SF")
 
 m.SF1 <- lmer(Height_cm ~ CO2 + Round + week + (1|Chamber), data = h.SF, REML=F)
@@ -279,87 +279,68 @@ anova(m.BW1, m.BW1.log) # ln-transformed w/lower AIC
 summary(m.BW1.log) # no effect of CO2
 
 ## Clover
-#########
-h.C <- leaves %>% filter(Plant == "C")
+l.C <- leaves %>% filter(Plant == "C")
 
-m.C1 <- lmer(Leaf_no ~ CO2 + Round + week + (1|Chamber), data = h.C, REML=F)
+m.C1 <- lmer(Leaf_no ~ CO2 + Round + week + (1|Chamber), data = l.C, REML=F)
 plot(simulationOutput <- simulateResiduals(fittedModel=m.C1, plot =F))
-m.C1.log <- lmer(log(Leaf_no) ~ CO2 + Round + week + (1|Chamber), data = h.C, REML=F)
+m.C1.log <- lmer(log(Leaf_no) ~ CO2 + Round + week + (1|Chamber), data = l.C, REML=F)
 plot(simulationOutput <- simulateResiduals(fittedModel=m.C1.log, plot =F))
-summary(m.C1)
-summary(m.C1.log)
-anova(m.C1, m.C1.log)
-AIC(m.C1) # 6435.151
-# everything is significant
+anova(m.C1, m.C1.log) # ln-transformed w/lower AIC
+summary(m.C1.log) # CO2 not significant 
 
-#######
 ## Dandelion
-######
-h.D <- leaves %>% filter(Plant == "D")
-h.D <- h.D %>% filter(Round == "1")
+l.D <- leaves %>% filter(Plant == "D")
+l.D <- l.D %>% filter(Round == "1") # only had plants in round 1
 
-m.D1 <- lmer(Leaf_no ~ CO2 + week + (1|Chamber), data = h.D, REML=F)
+m.D1 <- lmer(Leaf_no ~ CO2 + week + (1|Chamber), data = l.D, REML=F)
 plot(simulationOutput <- simulateResiduals(fittedModel=m.D1, plot =F))
-m.D1.log <- lmer(log(Leaf_no) ~ CO2 + week + (1|Chamber), data = h.D, REML=F)
+m.D1.log <- lmer(log(Leaf_no) ~ CO2 + week + (1|Chamber), data = l.D, REML=F)
 plot(simulationOutput <- simulateResiduals(fittedModel=m.D1.log, plot =F))
-summary(m.D1.log)
-summary(m.D1)
-anova(m.D1, m.D1.log)
-AIC(m.D1) # 2110.201
-# week significant
+anova(m.D1, m.D1.log) #ln-transformed lower AIC
+summary(m.D1.log) # week significant
 
-#######
 ## Lacy Phacelia
-#######
-h.LP <- leaves %>% filter(Plant == "LP")
+l.LP <- leaves %>% filter(Plant == "LP")
 
-m.LP1 <- lmer(Leaf_no ~ CO2 + Round + week + (1|Chamber), data = h.LP, REML=F)
+m.LP1 <- lmer(Leaf_no ~ CO2 + Round + week + (1|Chamber), data = l.LP, REML=F)
 plot(simulationOutput <- simulateResiduals(fittedModel=m.LP1, plot =F))
-m.LP1.log <- lmer(log(Leaf_no) ~ CO2 + Round + week + (1|Chamber), data = h.LP, REML=F)
+m.LP1.log <- lmer(log(Leaf_no) ~ CO2 + Round + week + (1|Chamber), data = l.LP, REML=F)
 plot(simulationOutput <- simulateResiduals(fittedModel=m.LP1.log, plot =F))
-summary(m.LP1)
-summary(m.LP1.log)
-anova(m.LP1, m.LP1.log)
-m.LP1.log2 <- lmer(log(Leaf_no) ~ CO2 + week + (1|Chamber), data = h.LP, REML=F)
+anova(m.LP1, m.LP1.log) #ln-transformed lower AIC
+summary(m.LP1.log) # round not significant compare models w/o round
+
+m.LP1.log2 <- lmer(log(Leaf_no) ~ CO2 + week + (1|Chamber), data = l.LP, REML=F)
 plot(simulationOutput <- simulateResiduals(fittedModel=m.LP1.log2, plot =F))
 anova(m.LP1.log2, m.LP1.log) #AIC is 0.1 less without Round. Going to leave it as is for now. 
-AIC(m.LP1) # 5969.193
-# everything is significant
 
-########
 ## Nasturtium
-#######
-h.N <- leaves %>% filter(Plant == "N")
+l.N <- leaves %>% filter(Plant == "N")
 
-m.N1 <- lmer(Leaf_no ~ CO2+Round+week + (1|Chamber), data = h.N, REML=F)
+m.N1 <- lmer(Leaf_no ~ CO2+Round+week + (1|Chamber), data = l.N, REML=F)
 plot(simulationOutput <- simulateResiduals(fittedModel=m.N1, plot =F))
-m.N1.log <- lmer(log(Leaf_no) ~ CO2+Round+week + (1|Chamber), data = h.N, REML=F)
+m.N1.log <- lmer(log(Leaf_no) ~ CO2+Round+week + (1|Chamber), data = l.N, REML=F)
 plot(simulationOutput <- simulateResiduals(fittedModel=m.N1.log, plot =F))
-summary(m.N1)
-summary(m.N1.log)
-anova(m.N1, m.N1.log)
-AIC(m.N1) # 4120.195
-# round, week, roundxweek significant
+anova(m.N1, m.N1.log) #ln-transformed lower AIC
+summary(m.N1.log) # Co2, week significant
 
-########
-## PP
-########
-h.PP <- leaves %>% filter(Plant == "PP")
-h.PP <- h.PP %>% filter(Round == "1")
+# try without round
+m.N1.log2 <- lmer(log(Leaf_no) ~ CO2+week + (1|Chamber), data = l.N, REML=F)
+plot(simulationOutput <- simulateResiduals(fittedModel=m.N1.log2, plot =F))
+anova(m.N1.log2, m.N1.log) # lower AIC w/o round
+summary(m.N1.log2)
 
-m.PP1 <- lmer(Leaf_no ~ CO2 + week + (1|Chamber), data = h.PP, REML=F)
+## Partridge Pea
+l.PP <- leaves %>% filter(Plant == "PP")
+l.PP <- l.PP %>% filter(Round == "1") # only had plants in round 1
+
+m.PP1 <- lmer(Leaf_no ~ CO2 + week + (1|Chamber), data = l.PP, REML=F)
 plot(simulationOutput <- simulateResiduals(fittedModel=m.PP1, plot =F))
-m.PP1.log <- lmer(log(Leaf_no) ~ CO2 + week + (1|Chamber), data = h.PP, REML=F)
+m.PP1.log <- lmer(log(Leaf_no) ~ CO2 + week + (1|Chamber), data = l.PP, REML=F)
 plot(simulationOutput <- simulateResiduals(fittedModel=m.PP1.log, plot =F))
-summary(m.PP1)
-summary(m.PP1.log)
-anova(m.PP1, m.PP1.log)
-AIC(m.PP1) # 2194.852
-# week is significant
+anova(m.PP1, m.PP1.log) # lower AIC w/ln-transformation
+summary(m.PP1.log) # co2 not significant 
 
-########
-## SA
-########
+## Sweet alyssum 
 h.SA <- leaves %>% filter(Plant == "SA")
 
 m.SA1 <- lmer(Leaf_no ~ CO2+Round+week + (1|Chamber), data = h.SA, REML=F)
