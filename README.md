@@ -1,2 +1,2 @@
 # eCO2_SciReports
-Code used for analyses and figure making for eCO2 Manuscript 
+Code and data files used for analyses and figure making for eCO2 Manuscript (Bernauer et al. in prep.)
