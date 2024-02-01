@@ -1,3 +1,9 @@
+## Bernauer et al. (in prep for SciReports) Elevated atmospheric CO2 has 
+## inconsistent effects on pollen chemistry and plant growth across
+## flowering plant species
+
+# script to plot and analyze targeted metabolomics from experiment 1
+
 library(ggplot2)
 library(tidyverse)
 
