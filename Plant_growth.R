@@ -71,44 +71,18 @@ biomass$Plant <- as.factor(biomass$Plant)
 ############################
 
 ## height
-# plot everything together (both rounds)
-# remove plants and dates with fewer than 3 observations
+
+# remove plants and dates with fewer than 3 observations, remove plants with zero height (seeds that had not germinated yet)
 height <- height %>% group_by(Plant, Chamber, Round, Date) %>% filter(n()>2) %>% ungroup()
 height <- height %>% filter (Height_cm != "0")
 
-## summarize and plot
-h.sum <- height %>% group_by(Plant, CO2, datenum) %>%
-  dplyr::summarise(
-    count = n(),
-    mean = mean(Height_cm, na.rm = T),
-    sd = sd(Height_cm, na.rm = T)
-  )
-h.sum$se <- h.sum$sd/sqrt(h.sum$count)
-
-plants <- c("Borage", "Buckwheat","Red Clover", "Dandelion", "Lacy Phacelia","Nasturtium","Partridge Pea", "Sweet Alyssum", "Sunflower")
-names(plants) <- c("B", "BW", "C", "D", "LP", "N", "PP", "SA", "SF")
-
-h.sum$CO2 <- factor(h.sum$CO2, levels = c("0", "1"))
-h.sum <- h.sum %>% filter(datenum < 77)
-
-ggplot(h.sum, aes(x=datenum, y = mean, color = CO2))+
-  geom_point()+
-  geom_errorbar(aes(ymin=mean-se, ymax = mean+se), width=0.2)+
-  geom_line()+
-  theme_classic()+
-  theme(legend.position = "bottom")+
-  labs(y="Height (cm) +/- se", x = "Weeks since planting")+
-  scale_color_manual(values = c("grey","cornflowerblue"), 
-                     labels = c("aCO2", "eCO2"),
-                     name = "Treatment")+
-  scale_x_continuous(breaks = c(14, 21, 28, 35, 42, 49, 56, 63, 70), 
-                     labels = c("2", "3", "4", "5", "6", "7", "8", "9", "10"))+
-  facet_wrap(vars(Plant), scales = "free",
-             labeller = labeller(Plant = plants),
-             ncol = 3)
+# set list of plant names
+plants.height <- c("Borage", "Buckwheat","Red Clover", "Dandelion", "Lacy Phacelia","Nasturtium","Partridge Pea", "Sweet Alyssum", "Sunflower")
+names(plants.height) <- c("B", "BW", "C", "D", "LP", "N", "PP", "SA", "SF")
 
 height$CO2 <- as.factor(height$CO2)
 
+# plot height by week by CO2 treatments
 ggplot(height, aes(x=datenum, y = Height_cm, color = CO2))+
   geom_point(aes(color = CO2), alpha = 0.4, size = 0.5)+
   geom_smooth(method = "loess", aes(fill = CO2))+
@@ -123,69 +97,7 @@ ggplot(height, aes(x=datenum, y = Height_cm, color = CO2))+
                      labels = c("2", "3", "4", "5", "6", "7", "8", "9", "10"),
                      limits = c(14,70))+
   facet_wrap(vars(Plant), scales = "free",
-             labeller = labeller(Plant = plants),
-             ncol = 3)
-
-
-# remove plants and dates with fewer than 3 observations
-height <- height %>% group_by(Plant, Chamber, Round, Date) %>% filter(n()>2) %>% ungroup()
-
-## summarize and plot
-h.sum <- height %>% group_by(Plant, CO2, Date) %>%
-  dplyr::summarise(
-    count = n(),
-    mean = mean(Height_cm, na.rm = T),
-    sd = sd(Height_cm, na.rm = T)
-  )
-h.sum$se <- h.sum$sd/sqrt(h.sum$count)
-
-plants <- c("Borage", "Buckwheat","Red Clover", "Dandelion", "Lacy Phacelia","Nasturtium","Partridge Pea", "Sweet Alyssum", "Sunflower")
-names(plants) <- c("B", "BW", "C", "D", "LP", "N", "PP", "SA", "SF")
-
-h.sum$CO2 <- factor(h.sum$CO2, levels = c("0", "1"))
-
-ggplot(h.sum, aes(x=Date, y = mean, shape = CO2))+
-  geom_point()+
-  geom_errorbar(aes(ymin=mean-se, ymax = mean+se), width=0.2)+
-  geom_line()+
-  theme_classic()+
-  theme(legend.position = "bottom")+
-  labs(y="Height (cm) +/- se", x = "Date")+
-  scale_shape_manual(values = c(1,16), 
-                     labels = c("aCO2", "eCO2"),
-                     name = "Treatment")+
-  facet_wrap(vars(Plant), scales = "free",
-             labeller = labeller(Plant = plants),
-             ncol = 3)
-
-h.sum$Round <-as.factor(h.sum$Round)
-# omit situations where there are few than 3 plants per date
-h.sum1 <- h.sum %>% filter(Round == "1")
-
-ggplot(h.sum1, aes(x=Date, y = mean, shape = Chamber))+
-  geom_point()+
-  geom_errorbar(aes(ymin=mean-se, ymax = mean+se), width=0.2)+
-  geom_line()+
-  theme_classic()+
-  theme(legend.position = "bottom")+
-  labs(y="Height (cm) +/- se", x = "Date")+
-  scale_shape_manual(values = c(0,15,1,16), labels = c("60 - eCO2", "63 - eCO2", "62 - aCO2", "61 - aCO2"))+
-  facet_wrap(vars(Plant), scales = "free",
-             labeller = labeller(Plant = plants),
-             ncol = 3)
-
-h.sum2 <- h.sum %>% filter(Round == "2")
-
-ggplot(h.sum2, aes(x=Date, y = mean, shape = Chamber))+
-  geom_point()+
-  geom_errorbar(aes(ymin=mean-se, ymax = mean+se), width=0.2)+
-  geom_line()+
-  theme_classic()+
-  theme(legend.position = "bottom")+
-  labs(y="Height (cm) +/- se", x = "Date")+
-  scale_shape_manual(values = c(0,15,1,16), labels = c("60 - eCO2", "63 - eCO2", "62 - aCO2", "61 - aCO2"))+
-  facet_wrap(vars(Plant), scales = "free",
-             labeller = labeller(Plant = plants),
+             labeller = labeller(Plant = plants.height),
              ncol = 3)
 
 height$week <- height$datenum/7
