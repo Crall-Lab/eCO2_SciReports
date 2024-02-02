@@ -515,153 +515,88 @@ m.B1 <- lmer(datenum ~ CO2 + Round + (1|Chamber), data = ff.B, REML=F)
 plot(simulationOutput <- simulateResiduals(fittedModel = m.B1, plot = F))
 m.B2 <- lmer(log(datenum) ~ CO2 + Round + (1|Chamber), data = ff.B, REML=F)
 plot(simulationOutput <- simulateResiduals(fittedModel = m.B2, plot = F))
-summary(m.B1)
-anova(m.B1)
-anova(m.B2)
-summary(m.B2)
 anova(m.B1, m.B2) # no difference, but AIC lower when log-transformed
-# no significance 
+summary(m.B2)
 
-######
 ## Buckwheat
-######
-ff.B <- ff %>% filter(Plant == "BW")
+ff.BW <- ff %>% filter(Plant == "BW")
 
-m.B1 <- lmer(datenum ~ CO2 + Round + (1|Chamber), data = ff.B, REML=F)
+m.B1 <- lmer(datenum ~ CO2 + Round + (1|Chamber), data = ff.BW, REML=F)
 plot(simulationOutput <- simulateResiduals(fittedModel = m.B1, plot = F))
-m.B2 <- lmer(log(datenum) ~ CO2 + Round + (1|Chamber), data = ff.B, REML=F)
+m.B2 <- lmer(log(datenum) ~ CO2 + Round + (1|Chamber), data = ff.BW, REML=F)
 plot(simulationOutput <- simulateResiduals(fittedModel = m.B2, plot = F))
-summary(m.B1)
-anova(m.B1)
-summary(m.B2)
-anova(m.B2)
 anova(m.B1, m.B2) # no difference between model coverage, but lower AIC when log-transformed
+summary(m.B2)
 
-#######
 ## Clover
-########
-ff.B <- ff %>% filter(Plant == "C")
+ff.C <- ff %>% filter(Plant == "C")
 
-m.B1 <- lmer(datenum ~ CO2 + Round + (1|Chamber), data = ff.B, REML=F)
+m.B1 <- lmer(datenum ~ CO2 + Round + (1|Chamber), data = ff.C, REML=F)
 plot(simulationOutput <- simulateResiduals(fittedModel = m.B1, plot = F))
-m.B2 <- lmer(log(datenum) ~ CO2 + Round + (1|Chamber), data = ff.B, REML=F)
+m.B2 <- lmer(log(datenum) ~ CO2 + Round + (1|Chamber), data = ff.C, REML=F)
 plot(simulationOutput <- simulateResiduals(fittedModel = m.B2, plot = F))
-summary(m.B1)
-anova(m.B1)
-summary(m.B2)
-anova(m.B2)
 anova(m.B1, m.B2) # no difference, AIC lower for log transformed
+summary(m.B2)
 
-#######
 ## Lacy Phacelia
-########
-ff.B <- ff %>% filter(Plant == "LP")
+ff.LP <- ff %>% filter(Plant == "LP")
 
-m.B1 <- lmer(datenum ~ CO2 + Round + (1|Chamber), data = ff.B, REML=F)
+m.B1 <- lmer(datenum ~ CO2 + Round + (1|Chamber), data = ff.LP, REML=F)
 plot(simulationOutput <- simulateResiduals(fittedModel = m.B1, plot = F))
-m.B2 <- lmer(log(datenum) ~ CO2 + Round + (1|Chamber), data = ff.B, REML=F)
+m.B2 <- lmer(log(datenum) ~ CO2 + Round + (1|Chamber), data = ff.LP, REML=F)
 plot(simulationOutput <- simulateResiduals(fittedModel = m.B2, plot = F))
-summary(m.B1)
-anova(m.B1)
-summary(m.B2)
-anova(m.B2)
 anova(m.B1, m.B2) # no sig dif, but lower AIC when log-transformed
-
-#######
-## Nasturtium
-#######
-ff.B <- ff %>% filter(Plant == "N")
-
-m.B1 <- lmer(datenum ~ CO2 + Round + (1|Chamber), data = ff.B, REML=F)
-plot(simulationOutput <- simulateResiduals(fittedModel = m.B1, plot = F))
-m.B2 <- lmer(log(datenum) ~ CO2 + Round + (1|Chamber), data = ff.B, REML=F)
-plot(simulationOutput <- simulateResiduals(fittedModel = m.B2, plot = F))
-summary(m.B1)
-anova(m.B1)
 summary(m.B2)
-anova(m.B2)
-anova(m.B1, m.B2) # no sig dif between models, but log transformed w/lower AIC
 
-#######
+## Nasturtium
+ff.N <- ff %>% filter(Plant == "N")
+
+m.B1 <- lmer(datenum ~ CO2 + Round + (1|Chamber), data = ff.N, REML=F)
+plot(simulationOutput <- simulateResiduals(fittedModel = m.B1, plot = F))
+m.B2 <- lmer(log(datenum) ~ CO2 + Round + (1|Chamber), data = ff.N, REML=F)
+plot(simulationOutput <- simulateResiduals(fittedModel = m.B2, plot = F))
+anova(m.B1, m.B2) # no sig dif between models, but log transformed w/lower AIC
+summary(m.B2)
+
 ## Partridge Pea
 #####
-ff.B <- ff %>% filter(Plant == "PP")
-ff.B <- ff.B %>% filter(Round == "1")
+ff.PP <- ff %>% filter(Plant == "PP")
+ff.PP <- ff.PP %>% filter(Round == "1")
 
-m.B1 <- lmer(datenum ~ CO2 + (1|Chamber), data = ff.B, REML=F)
+m.B1 <- lmer(datenum ~ CO2 + (1|Chamber), data = ff.PP, REML=F)
 plot(simulationOutput <- simulateResiduals(fittedModel = m.B1, plot = F))
-m.B2 <- lmer(log(datenum) ~ CO2 + (1|Chamber), data = ff.B, REML=F)
+m.B2 <- lmer(log(datenum) ~ CO2 + (1|Chamber), data = ff.PP, REML=F)
 plot(simulationOutput <- simulateResiduals(fittedModel = m.B2, plot = F))
-summary(m.B1)
-anova(m.B1)
-summary(m.B2)
-anova(m.B2)
 anova(m.B1, m.B2) # no sig dif, but log-transformed w/lower AIC
+summary(m.B2)
 
-########
 ## Sweet alyssum
-########
-ff.B <- ff %>% filter(Plant == "SA")
+ff.SA <- ff %>% filter(Plant == "SA")
 
-m.B1 <- lmer(datenum ~ CO2 + Round + (1|Chamber), data = ff.B, REML=F)
+m.B1 <- lmer(datenum ~ CO2 + Round + (1|Chamber), data = ff.SA, REML=F)
 plot(simulationOutput <- simulateResiduals(fittedModel = m.B1, plot = F))
-m.B2 <- lmer(log(datenum) ~ CO2 + Round + (1|Chamber), data = ff.B, REML=F)
+m.B2 <- lmer(log(datenum) ~ CO2 + Round + (1|Chamber), data = ff.SA, REML=F)
 plot(simulationOutput <- simulateResiduals(fittedModel = m.B2, plot = F))
-summary(m.B1)
-anova(m.B1)
-summary(m.B2)
-anova(m.B2)
 anova(m.B1, m.B2) # no difference but lower AIC when log transformed
-
-########
-## Sunflower
-######
-ff.B <- ff %>% filter(Plant == "SF")
-
-m.B1 <- lmer(datenum ~ CO2+Round + (1|Chamber), data = ff.B, REML=F)
-plot(simulationOutput <- simulateResiduals(fittedModel = m.B1, plot = F))
-m.B2 <- lmer(log(datenum) ~ CO2 + Round + (1|Chamber), data = ff.B, REML=F)
-plot(simulationOutput <- simulateResiduals(fittedModel = m.B2, plot = F))
-summary(m.B1)
-anova(m.B1)
 summary(m.B2)
-anova(m.B2)
+
+## Sunflower
+ff.SF <- ff %>% filter(Plant == "SF")
+
+m.B1 <- lmer(datenum ~ CO2+Round + (1|Chamber), data = ff.SF, REML=F)
+plot(simulationOutput <- simulateResiduals(fittedModel = m.B1, plot = F))
+m.B2 <- lmer(log(datenum) ~ CO2 + Round + (1|Chamber), data = ff.SF, REML=F)
+plot(simulationOutput <- simulateResiduals(fittedModel = m.B2, plot = F))
 anova(m.B1, m.B2) # no difference by log transformed model w/lower AIC
+summary(m.B2)
 
 ######################
 ## flower diameter
-#####################
+
 # remove NAs'
 W.area <- W.area %>% filter(!is.na(Plant))
-
 # remove any plant, date, round, chambers w/o 3+ observations
 area <- W.area %>% group_by(Plant, CO2) %>% filter(n()>2) %>% ungroup()
-
-## summarize and plot
-a.sum <- area %>% group_by(Plant, CO2) %>%
-  dplyr::summarise(
-    count = n(),
-    mean = mean(log(Mean), na.rm = T),
-    sd = sd(log(Mean), na.rm = T)
-  )
-a.sum$se <- a.sum$sd/sqrt(a.sum$count)
-a.sum$CO2 <- factor(a.sum$CO2, levels = c(0, 1))
-
-plants <- c("Borage", "Buckwheat","Red Clover", "Lacy Phacelia","Nasturtium","Partridge Pea", "Sweet Alyssum", "Sunflower")
-names(plants) <- c("B", "BW", "C", "LP", "N", "PP", "SA", "SF")
-
-ggplot(a.sum, aes(x=Plant, y = mean, color = CO2))+
-  geom_point(position=position_dodge(0.75), size = 2)+
-  geom_errorbar(aes(ymin=mean-se, ymax = mean+se), 
-                width=0.3, 
-                position=position_dodge(0.75))+
-  theme_classic()+
-  theme(legend.position = "bottom",
-        axis.text.x = element_text(angle = 90))+
-  labs(y="ln(Flower diameter) ± se", x = "Plant species")+
-  scale_color_manual(values = c("grey","navyblue"), 
-                     labels = c("aCO2", "eCO2"))+
-  scale_x_discrete(labels = plants)
 
 ggplot(area, aes(x=Plant, y = log(Mean), fill = CO2))+
   geom_violin()+
@@ -673,7 +608,7 @@ ggplot(area, aes(x=Plant, y = log(Mean), fill = CO2))+
   scale_color_manual(values = c("black", "navy"),
                      labels = c("aCO2", "eCO2"),
                      name = "CO2 Treatment")+
-  scale_x_discrete(labels = plants)+
+  scale_x_discrete(labels = plants.flowers)+
   theme(legend.position = "none",
         axis.text.x = element_text(angle = 90, hjust=1, size = .5),
         axis.title.x=element_blank())+
@@ -686,174 +621,102 @@ ggplot(area, aes(x=Plant, y = log(Mean), fill = CO2))+
   labs(y = "ln(Flower diameter)")
 
 
-## Compare all 
-qqPlot(log(area$Mean))
-hist(log(area$Mean))
+## Compare all plant species together
 m.B1 <- lmer(Mean ~ CO2*Plant + Round + (1|Chamber), data = area, REML=F)
 plot(simulationOutput <- simulateResiduals(fittedModel = m.B1, plot = F))
 m.B2 <- lmer(log(Mean) ~ CO2*Plant + Round + (1|Chamber), data = area, REML=F)
 plot(simulationOutput <- simulateResiduals(fittedModel = m.B2, plot = F))
-summary(m.B1)
-anova(m.B1)
-summary(m.B2)
-anova(m.B2)
 anova(m.B1, m.B2) # no difference, but log-transformed has lower AIC
-
-#######
-## Borage
-########
-ff.B <- area %>% filter(Plant == "B")
-
-m.B1 <- lmer(Mean ~ CO2 + Round + (1|Chamber), data = ff.B, REML=F)
-plot(simulationOutput <- simulateResiduals(fittedModel = m.B1, plot = F))
-m.B2 <- lmer(log(Mean) ~ CO2 + Round + (1|Chamber), data = ff.B, REML=F)
-plot(simulationOutput <- simulateResiduals(fittedModel = m.B2, plot = F))
-summary(m.B1)
-anova(m.B1)
 summary(m.B2)
-anova(m.B2)
-anova(m.B1, m.B2) # no difference, but lower AIC when log-transformed
 
-########
+# compare each plant species separately
+## Borage
+fa.B <- area %>% filter(Plant == "B")
+
+m.B1 <- lmer(Mean ~ CO2 + Round + (1|Chamber), data = fa.B, REML=F)
+plot(simulationOutput <- simulateResiduals(fittedModel = m.B1, plot = F))
+m.B2 <- lmer(log(Mean) ~ CO2 + Round + (1|Chamber), data = fa.B, REML=F)
+plot(simulationOutput <- simulateResiduals(fittedModel = m.B2, plot = F))
+anova(m.B1, m.B2) # no difference, but lower AIC when log-transformed
+summary(m.B2)
+
 ## Buckwheat
 ######
-ff.B <- area %>% filter(Plant == "BW")
+fa.BW <- area %>% filter(Plant == "BW")
 
-m.B1 <- lmer(Mean ~ CO2 + Round + (1|Chamber), data = ff.B, REML=F)
+m.B1 <- lmer(Mean ~ CO2 + Round + (1|Chamber), data = fa.BW, REML=F)
 plot(simulationOutput <- simulateResiduals(fittedModel = m.B1, plot = F))
-m.B2 <- lmer(log(Mean) ~ CO2 + Round + (1|Chamber), data = ff.B, REML=F)
+m.B2 <- lmer(log(Mean) ~ CO2 + Round + (1|Chamber), data = fa.BW, REML=F)
 plot(simulationOutput <- simulateResiduals(fittedModel = m.B2, plot = F))
-summary(m.B1)
-anova(m.B1)
-summary(m.B2)
-anova(m.B2)
 anova(m.B1, m.B2) # no difference, but lower AIC when log-transformed
+summary(m.B2)
 
-##########
 ## Clover
-########
-ff.B <- area %>% filter(Plant == "C")
+fa.C <- area %>% filter(Plant == "C")
 
-m.B1 <- lmer(Mean ~ CO2 + Round + (1|Chamber), data = ff.B, REML=F)
+m.B1 <- lmer(Mean ~ CO2 + Round + (1|Chamber), data = fa.C, REML=F)
 plot(simulationOutput <- simulateResiduals(fittedModel = m.B1, plot = F))
-m.B2 <- lmer(log(Mean) ~ CO2 + Round + (1|Chamber), data = ff.B, REML=F)
+m.B2 <- lmer(log(Mean) ~ CO2 + Round + (1|Chamber), data = fa.C, REML=F)
 plot(simulationOutput <- simulateResiduals(fittedModel = m.B2, plot = F))
-summary(m.B1)
-anova(m.B1)
-summary(m.B2)
-anova(m.B2)
 anova(m.B1, m.B2) # no difference, but lower AIC when log-transformed
+summary(m.B2)
 
-######
 ## Lacy Phacelia
-######
-ff.B <- area %>% filter(Plant == "LP")
+fa.LP <- area %>% filter(Plant == "LP")
 
-m.B1 <- lmer(Mean ~ CO2+Round + (1|Chamber), data = ff.B, REML=F)
+m.B1 <- lmer(Mean ~ CO2+Round + (1|Chamber), data = fa.LP, REML=F)
 plot(simulationOutput <- simulateResiduals(fittedModel = m.B1, plot = F))
-m.B2 <- lmer(log(Mean) ~ CO2 + Round + (1|Chamber), data = ff.B, REML=F)
+m.B2 <- lmer(log(Mean) ~ CO2 + Round + (1|Chamber), data = fa.LP, REML=F)
 plot(simulationOutput <- simulateResiduals(fittedModel = m.B2, plot = F))
-summary(m.B1)
-anova(m.B1)
-summary(m.B2)
-anova(m.B2)
 anova(m.B1, m.B2) # no difference, but lower AIC when log-transformed
+summary(m.B2)
 
-#####
 ## Nasturtium
-######
-ff.B <- area %>% filter(Plant == "N")
+fa.N <- area %>% filter(Plant == "N")
 
-m.B1 <- lmer(Mean ~ CO2 + Round + (1|Chamber), data = ff.B, REML=F)
+m.B1 <- lmer(Mean ~ CO2 + Round + (1|Chamber), data = fa.N, REML=F)
 plot(simulationOutput <- simulateResiduals(fittedModel = m.B1, plot = F))
-m.B2 <- lmer(log(Mean) ~ CO2 + Round + (1|Chamber), data = ff.B, REML=F)
+m.B2 <- lmer(log(Mean) ~ CO2 + Round + (1|Chamber), data = fa.N, REML=F)
 plot(simulationOutput <- simulateResiduals(fittedModel = m.B2, plot = F))
-summary(m.B1)
-anova(m.B1)
-summary(m.B2)
-anova(m.B2)
 anova(m.B1, m.B2) # no difference, but lower AIC when log-transformed
+summary(m.B2)
 
-#########
 ## Partridge Pea
-#########
-ff.B <- area %>% filter(Plant == "PP")
-ff.B <- ff.B %>% filter(Round == "1")
+fa.PP <- area %>% filter(Plant == "PP")
+fa.PP <- fa.PP %>% filter(Round == "1")
 
-m.B1 <- lmer(Mean ~ CO2 + (1|Chamber), data = ff.B, REML=F)
+m.B1 <- lmer(Mean ~ CO2 + (1|Chamber), data = fa.PP, REML=F)
 plot(simulationOutput <- simulateResiduals(fittedModel = m.B1, plot = F))
-m.B2 <- lmer(log(Mean) ~ CO2 + (1|Chamber), data = ff.B, REML=F)
+m.B2 <- lmer(log(Mean) ~ CO2 + (1|Chamber), data = fa.PP, REML=F)
 plot(simulationOutput <- simulateResiduals(fittedModel = m.B2, plot = F))
-summary(m.B1)
-anova(m.B1)
-summary(m.B2)
-anova(m.B2)
 anova(m.B1, m.B2) # no difference, but lower AIC when log-transformed
+summary(m.B2)
 
-#########
 ## Sweet alyssum
-##########
-ff.B <- area %>% filter(Plant == "SA")
+fa.SA <- area %>% filter(Plant == "SA")
 
-m.B1 <- lmer(Mean ~ CO2 + Round + (1|Chamber), data = ff.B, REML=F)
+m.B1 <- lmer(Mean ~ CO2 + Round + (1|Chamber), data = fa.SA, REML=F)
 plot(simulationOutput <- simulateResiduals(fittedModel = m.B1, plot = F))
-m.B2 <- lmer(log(Mean) ~ CO2 + Round + (1|Chamber), data = ff.B, REML=F)
+m.B2 <- lmer(log(Mean) ~ CO2 + Round + (1|Chamber), data = fa.SA, REML=F)
 plot(simulationOutput <- simulateResiduals(fittedModel = m.B2, plot = F))
-summary(m.B1)
-anova(m.B1)
-summary(m.B2)
-anova(m.B2)
 anova(m.B1, m.B2) # no difference, but lower AIC when log-transformed
+summary(m.B2)
 
-##########
 ## Sunflower
-###########
-ff.B <- area %>% filter(Plant == "SF")
+fa.SF <- area %>% filter(Plant == "SF")
 
-m.B1 <- lmer(Mean ~ CO2 + Round + (1|Chamber), data = ff.B, REML=F)
+m.B1 <- lmer(Mean ~ CO2 + Round + (1|Chamber), data = fa.SF, REML=F)
 plot(simulationOutput <- simulateResiduals(fittedModel = m.B1, plot = F))
-m.B2 <- lmer(log(Mean) ~ CO2 + Round + (1|Chamber), data = ff.B, REML=F)
+m.B2 <- lmer(log(Mean) ~ CO2 + Round + (1|Chamber), data = fa.SF, REML=F)
 plot(simulationOutput <- simulateResiduals(fittedModel = m.B2, plot = F))
-summary(m.B1)
-anova(m.B1)
-summary(m.B2)
-anova(m.B2)
 anova(m.B1, m.B2) # no difference, but lower AIC when log-transformed
-
-# Round 1
-ff.B1 <- ff.B %>% filter(Round == "1")
-t.test(Mean~CO2, data = ff.B1)
-# t(21.998) = -2.0989, p = 0.04753 -  significant
-# mean aCO2 = 97.39394, eCO2 = 110.58974, eCO2 flowers are bigger than aCO2
-# compare by chamber
-res.aov<-aov(Mean~Chamber, data = ff.B1)
-summary(res.aov) # no significant difference by chamber F(3)=1.938, p = 0.156
-# Round 2
-ff.B1 <- ff.B %>% filter(Round == "2")
-t.test(Mean~CO2, data = ff.B1)
-# t(48.377) = -0.72369, p = 0.4727 -  not significant 
-res.aov<-aov(Mean~Chamber, data = ff.B1)
-summary(res.aov) # no significant difference by chamber F(3)=0.978, p = 0.415
-
+summary(m.B2)
 
 ##############
 ## biomass
-#############
 # only from round 1
 BM <- biomass %>% group_by(Plant, CO2) %>% filter(n()>2) %>% ungroup()
 # ok all are good to go 
-
-BM.sum <- BM %>% group_by(Plant, CO2) %>%
-  dplyr::summarise(
-    count = n(),
-    mean = mean(Plant.biomass, na.rm = T),
-    sd = sd(Plant.biomass, na.rm = T)
-  )
-BM.sum$se <- BM.sum$sd/sqrt(BM.sum$count)
-
-# plot it
-plants <- c("Borage", "Buckwheat","Red Clover", "Dandelion", "Lacy Phacelia","Nasturtium","Partridge Pea", "Sweet Alyssum", "Sunflower")
-names(plants) <- c("B", "BW", "C", "D", "LP", "N", "PP", "SA", "SF")
 
 ggplot(BM, aes(x=Plant, y = log(Plant.biomass), fill = CO2))+
   geom_violin()+
@@ -865,7 +728,7 @@ ggplot(BM, aes(x=Plant, y = log(Plant.biomass), fill = CO2))+
   scale_color_manual(values = c("black", "navy"),
                      labels = c("aCO2", "eCO2"),
                      name = "CO2 Treatment")+
-  scale_x_discrete(labels = plants)#+
+  scale_x_discrete(labels = plants.height)+
 theme(legend.position = "none",
       axis.text.x = element_text(angle = 90, hjust=1, size = .2),
       axis.title.x=element_blank())+
@@ -877,59 +740,47 @@ theme(legend.position = "none",
                position=position_dodge(0.9))+
   labs(y="ln(Above-ground dry biomass)")
 
-# compare all 
-hist(log(BM$Plant.biomass))
-str(BM)
+# compare all plant species together
 BM$Chamber <- as.factor(BM$Chamber)
 BM <- BM %>% filter(Plant.biomass != 0)
 m.B <- lmer(log(Plant.biomass) ~ CO2*Plant+(1|Chamber), data = BM, REML = F)
 plot(simulationOutput <- simulateResiduals(fittedModel = m.B, plot = F))
 summary(m.B)
 anova(m.B)
-AIC(m.B) # 823.3703 
-# only sig. effect of plant, can quickly compare w/t-test
 
+# compare each plant species independently with t-tests
 # Borage
 b <- BM %>% filter(Plant == "B")
-t.test(Plant.biomass~CO2, data = b)
-# not significant 
+t.test(Plant.biomass~CO2, data = b) # not significant 
 
 # Buckwheat
 bw <- BM %>% filter(Plant == "BW")
-t.test(Plant.biomass~CO2, data = bw)
-# not significant 
+t.test(Plant.biomass~CO2, data = bw) # not significant 
 
 # Clover
 c <- BM %>% filter(Plant == "C")
-t.test(Plant.biomass~CO2, data = c)
-# not significant 
+t.test(Plant.biomass~CO2, data = c) # not significant 
 
 # Dandelion
 d <- BM %>% filter(Plant == "D")
-t.test(Plant.biomass~CO2, data = d)
-# not significant 
+t.test(Plant.biomass~CO2, data = d) # not significant 
 
 # Lacy Phacelia
 l <- BM %>% filter(Plant == "LP")
-t.test(Plant.biomass~CO2, data = l)
-# not significant 
+t.test(Plant.biomass~CO2, data = l) # not significant 
 
 # Nasturtium
 n <- BM %>% filter(Plant == "N")
-t.test(Plant.biomass~CO2, data = n)
-# not significant 
+t.test(Plant.biomass~CO2, data = n) # not significant 
 
 # Partridge pea
 p <- BM %>% filter(Plant == "PP")
-t.test(Plant.biomass~CO2, data = p)
-# significant
+t.test(Plant.biomass~CO2, data = p) # significant
 
 # Sweet Alyssum
 sa <- BM %>% filter(Plant == "SA")
-t.test(Plant.biomass~CO2, data = sa)
-# not significant 
+t.test(Plant.biomass~CO2, data = sa) # not significant 
 
 # Sunflower
 sf <- BM %>% filter(Plant == "SF")
-t.test(Plant.biomass~CO2, data = sf)
-# not significant 
+t.test(Plant.biomass~CO2, data = sf) # not significant 
