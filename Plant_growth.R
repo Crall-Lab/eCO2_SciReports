@@ -499,20 +499,16 @@ ggplot(ff, aes(x=Plant, y = log10(datenum), fill = CO2))+
   labs(y = "log(Days since planting)")
 
 ## Compare all plant species together
-hist(log(ff$datenum))
-m.B1 <- lmer(datenum ~ CO2*Plant+Round + (1|Chamber), data = ff, REML=F)
-plot(simulationOutput <- simulateResiduals(fittedModel = m.B1, plot = F))
-m.B2 <- lmer(log(datenum) ~ CO2*Plant+Round + (1|Chamber), data = ff, REML=F)
-plot(simulationOutput <- simulateResiduals(fittedModel = m.B2, plot = F))
-summary(m.B1)
-anova(m.B1)
-summary(m.B2)
-anova(m.B2)
-anova(m.B1, m.B2) # no difference, but log(datenum) with a substantially lower AIC. 
-
-######
+m.4 <- lmer(datenum ~ CO2*Plant+Round + (1|Chamber), data = ff, REML=F)
+plot(simulationOutput <- simulateResiduals(fittedModel = m.4, plot = F))
+m.4.log <- lmer(log(datenum) ~ CO2*Plant+Round + (1|Chamber), data = ff, REML=F)
+plot(simulationOutput <- simulateResiduals(fittedModel = m.4.log, plot = F))
+anova(m.4, m.4.log) # no difference, but log(datenum) with a substantially lower AIC.
+summary(m.4.log)
+anova(m.4.log)
+ 
+# compare each plant species independently
 ## Borage
-#######
 ff.B <- ff %>% filter(Plant == "B")
 
 m.B1 <- lmer(datenum ~ CO2 + Round + (1|Chamber), data = ff.B, REML=F)
