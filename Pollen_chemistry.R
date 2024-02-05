@@ -9,15 +9,6 @@ library("lme4")
 library("DHARMa")
 library("lmerTest")
 
-library("multilevelTools")
-library("JWileymisc")
-library("nlme")
-library("scales")
-library("see")
-
-library("GLMMadaptive")
-
-
 ##############################
 ## read in the data frames
 W.pollen<-read.csv(file = "Pollen_chemistry_exp2.csv", header = T, na.strings = c("", "NULLL"))
@@ -169,10 +160,10 @@ anova(m.B4, m.B3) # no difference, but m.B2 has lower AIC
 anova(m.B4) # Again, only Round is significant
 
 # C 
-m.B1 <- lmer(C ~ CO2 + Round + (1|Chamber), data = B.po, REML=F)
-plot(simulationOutput <- simulateResiduals(fittedModel = m.B1, plot = F))
-summary(m.B1)
-anova(m.B1) # only round is significant
+m.B5 <- lmer(C ~ CO2 + Round + (1|Chamber), data = B.po, REML=F)
+plot(simulationOutput <- simulateResiduals(fittedModel = m.B5, plot = F))
+summary(m.B5)
+anova(m.B5) # only round is significant
 
 ## Buckwheat
 # %N (proxy for pollen protein)
@@ -188,21 +179,16 @@ anova(m.BW2)
 anova(m.BW1, m.BW2) # virtually no difference between models
 
 # C 
-m.B1 <- lmer(C ~ CO2 + Round + (1|Chamber), data = BW.po, REML=F)
-plot(simulationOutput <- simulateResiduals(fittedModel = m.B1, plot = F))
-summary(m.B1)
-anova(m.B1) # nothing significant
-AIC(m.B1) # 219.5807
+m.BW3 <- lmer(C ~ CO2 + Round + (1|Chamber), data = BW.po, REML=F)
+plot(simulationOutput <- simulateResiduals(fittedModel = m.BW3, plot = F))
+summary(m.BW3)
+anova(m.BW3) # nothing significant
 
 # CN ratio
-m.B1 <- lmer(ratio ~ CO2 + Round + (1|Chamber), data = BW.po, REML=F)
-testDispersion(m.B1)
-simulationOutput <- simulateResiduals(fittedModel = m.B1, plot = F)
-residuals(simulationOutput, quantileFunction = qnorm, outlierValues = c(-7,7))
-plot(simulationOutput)
-summary(m.B1)
-anova(m.B1) # nothing significant
-AIC(m.B1) # 322.9815
+m.BW4 <- lmer(ratio ~ CO2 + Round + (1|Chamber), data = BW.po, REML=F)
+plot(simulationOutput <- simulateResiduals(fittedModel = m.BW4, plot = F))
+summary(m.BW4)
+anova(m.BW4) # nothing significant
 
 ## Red Clover
 # %N (proxy for pollen protein)
@@ -217,27 +203,18 @@ anova(m.C1) # No significant difference by round or CO2 level
 anova(m.C1, m.C2) # no difference, slightly lower AIC in m.C1
 
 # C:N ratio
-m.C2 <- lmer(ratio ~ CO2 + Round + (1|Chamber), data = C.po, REML=F)
-testDispersion(m.C2)
-simulationOutput <- simulateResiduals(fittedModel = m.C2, plot = F)
-plot(simulationOutput)
-summary(m.C2)
-anova(m.C2) # No significant difference by round or CO2 level
-AIC(m.C2) # 69.4536
+m.C3 <- lmer(ratio ~ CO2 + Round + (1|Chamber), data = C.po, REML=F)
+plot(simulationOutput <- simulateResiduals(fittedModel = m.C3, plot = F))
+summary(m.C3)
+anova(m.C3) # No significant difference by round or CO2 level
 
 # C 
-m.C2 <- lmer(C ~ CO2 + Round + (1|Chamber), data = C.po, REML=F)
-testDispersion(m.C2)
-simulationOutput <- simulateResiduals(fittedModel = m.C2, plot = F)
-plot(simulationOutput)
-summary(m.C2)
-summary(m.C2)
-anova(m.C2)
-AIC(m.C2) # 81.84848
+m.C4 <- lmer(C ~ CO2 + Round + (1|Chamber), data = C.po, REML=F)
+plot(simulationOutput <- simulateResiduals(fittedModel = m.C4, plot = F))
+summary(m.C4)
+anova(m.C4)
 
-#######
 ## Lacy Phacelia
-########
 # %N (proxy for pollen protein)
 LP.po <- W.pollen %>% filter(Plant_SP == "LP")
 
@@ -249,45 +226,17 @@ summary(m.LP1)
 anova(m.LP1) # significant difference by round 
 anova(m.LP1, m.LP2) # no difference, slightly lower AIC in m.LP1
 
-# try without CO2
-m.LP2 <- lmer(N ~ Round + (1|Chamber), data = LP.po, REML=F)
-summary(m.LP2)
-anova(m.LP2) # round still significant
-AIC(m.LP2) # 230.8186
-
-anova(m.LP1, m.LP2) # no difference
-
 # C:N ratio
-m.LP2 <- lmer(ratio ~ CO2 + Round + (1|Chamber), data = LP.po, REML=F)
-testDispersion(m.LP2)
-plot(simulationOutput <- simulateResiduals(fittedModel=m.LP2, plot =F))
-summary(m.LP2)
-anova(m.LP2) # No significant difference by CO2 level, but effect of round
-AIC(m.LP2) # 257.6186
-
-# remove CO2
-m.LP3 <- lmer(ratio ~ Round + (1|Chamber), data = LP.po, REML=F)
+m.LP3 <- lmer(ratio ~ CO2 + Round + (1|Chamber), data = LP.po, REML=F)
+plot(simulationOutput <- simulateResiduals(fittedModel=m.LP3, plot =F))
 summary(m.LP3)
-anova(m.LP3) # sig effect of round
-AIC(m.LP3) # 254.9079
-
-anova(m.LP2, m.LP3) # no difference
+anova(m.LP3) # No significant difference by CO2 level, but effect of round
 
 # C
-m.LP2 <- lmer(C ~ CO2 + Round + (1|Chamber), data = LP.po, REML=F)
-testDispersion(m.LP2)
-plot(simulationOutput <- simulateResiduals(fittedModel=m.LP2, plot =F))
-summary(m.LP2)
-anova(m.LP2) # effect of round
-AIC(m.LP2) # 243.7541
-
-# remove CO2
-m.LP3 <- lmer(C ~ Round + (1|Chamber), data = LP.po, REML=F)
-summary(m.LP3)
-anova(m.LP3) # effect of round
-AIC(m.LP3) # 240.0096
-
-anova(m.LP2, m.LP3) # no difference
+m.LP4 <- lmer(C ~ CO2 + Round + (1|Chamber), data = LP.po, REML=F)
+plot(simulationOutput <- simulateResiduals(fittedModel=m.LP4, plot =F))
+summary(m.LP4)
+anova(m.LP4) # effect of round
 
 ## Nasturtium
 # %N (proxy for pollen protein)
@@ -302,32 +251,32 @@ anova(m.N1) # No significant difference by round or CO2 level, but effect of rou
 anova(m.N1, m.N2) # no significant difference, slightly lower AIC in m.N1
 
 # C:N ratio
-m.N2 <- lmer(ratio ~ CO2 + Round + (1|Chamber), data = N.po, REML=F)
-plot(simulationOutput <- simulateResiduals(fittedModel=m.N2, plot =F))
-summary(m.N2)
-anova(m.N2) # No significant difference by round or CO2 level, but effect of round
+m.N3 <- lmer(ratio ~ CO2 + Round + (1|Chamber), data = N.po, REML=F)
+plot(simulationOutput <- simulateResiduals(fittedModel=m.N3, plot =F))
+summary(m.N3)
+anova(m.N3) # No significant difference by round or CO2 level, but effect of round
 
 # C 
-m.N2 <- lmer(C ~ CO2 + Round + (1|Chamber), data = N.po, REML=F)
-plot(simulationOutput <- simulateResiduals(fittedModel=m.N2, plot =F))
-summary(m.N2)
-anova(m.N2) # nothing is significant
+m.N4 <- lmer(C ~ CO2 + Round + (1|Chamber), data = N.po, REML=F)
+plot(simulationOutput <- simulateResiduals(fittedModel=m.N4, plot =F))
+summary(m.N4)
+anova(m.N4) # nothing is significant
 
 ## Partridge pea
 # %N (proxy for pollen protein)
 PP.po <- W.pollen %>% filter(Plant_SP == "PP")
 
-m.N1 <- lmer(N ~ CO2 + (1|Chamber), data = PP.po, REML=F)
-plot(simulationOutput <- simulateResiduals(fittedModel=m.N1, plot =F))
-summary(m.N1)
+m.PP1 <- lmer(N ~ CO2 + (1|Chamber), data = PP.po, REML=F)
+plot(simulationOutput <- simulateResiduals(fittedModel=m.PP1, plot =F))
+summary(m.PP1)
 
-m.N1 <- lmer(C ~ CO2 + (1|Chamber), data = PP.po, REML=F)
-plot(simulationOutput <- simulateResiduals(fittedModel=m.N1, plot =F))
-summary(m.N1)
+m.PP2 <- lmer(C ~ CO2 + (1|Chamber), data = PP.po, REML=F)
+plot(simulationOutput <- simulateResiduals(fittedModel=m.PP2, plot =F))
+summary(m.PP2)
 
-m.N1 <- lmer(ratio ~ CO2 + (1|Chamber), data = PP.po, REML=F)
-plot(simulationOutput <- simulateResiduals(fittedModel=m.N1, plot =F))
-summary(m.N1)
+m.PP3 <- lmer(ratio ~ CO2 + (1|Chamber), data = PP.po, REML=F)
+plot(simulationOutput <- simulateResiduals(fittedModel=m.PP3, plot =F))
+summary(m.PP3)
 
 ## Sweet Alyssum 
 # %N (proxy for pollen protein)
@@ -337,18 +286,19 @@ m.SA1 <- lmer(N ~ CO2 + Round + (1|Chamber), data = SA.po, REML=F)
 plot(simulationOutput <- simulateResiduals(fittedModel=m.SA1, plot =F))
 m.SA2 <- lmer(N ~ CO2 * Round + (1|Chamber), data = SA.po, REML = F)
 anova(m.SA1, m.SA2) # No significant difference by round or CO2 level, but effect of round
+anova(m.SA1)
 
 # C:N ratio
-m.SA2 <- lmer(ratio ~ CO2 + Round + (1|Chamber), data = SA.po, REML=F)
-plot(simulationOutput <- simulateResiduals(fittedModel=m.SA2, plot =F))
-summary(m.SA2)
-anova(m.SA2) # No significant difference by round or CO2 level, but effect of round
+m.SA3 <- lmer(ratio ~ CO2 + Round + (1|Chamber), data = SA.po, REML=F)
+plot(simulationOutput <- simulateResiduals(fittedModel=m.SA3, plot =F))
+summary(m.SA3)
+anova(m.SA3) # No significant difference by round or CO2 level, but effect of round
 
 # C 
-m.SA2 <- lmer(C ~ CO2 + Round + (1|Chamber), data = SA.po, REML=F)
-plot(simulationOutput <- simulateResiduals(fittedModel=m.SA2, plot =F))
-summary(m.SA2)
-anova(m.SA2) # nothing is significant
+m.SA4 <- lmer(C ~ CO2 + Round + (1|Chamber), data = SA.po, REML=F)
+plot(simulationOutput <- simulateResiduals(fittedModel=m.SA4, plot =F))
+summary(m.SA4)
+anova(m.SA4) # nothing is significant
 
 ## Sunflower 
 # %N (proxy for pollen protein)
@@ -364,16 +314,16 @@ anova(m.SF1) # CO2, Round, and the interaction are significant
 anova(m.SF2)
 
 # C:N ratio
-m.SF2 <- lmer(ratio ~ CO2 + Round + (1|Chamber), data = SF.po, REML=F)
-plot(simulationOutput <- simulateResiduals(fittedModel=m.SF2, plot =F))
-summary(m.SF2)
-anova(m.SF2) # CO2, Round, and the interaction are significant
+m.SF3 <- lmer(ratio ~ CO2 + Round + (1|Chamber), data = SF.po, REML=F)
+plot(simulationOutput <- simulateResiduals(fittedModel=m.SF3, plot =F))
+summary(m.SF3)
+anova(m.SF3) # CO2, Round, and the interaction are significant
 
 # % C
-m.SF1 <- lmer(C ~ CO2 + Round + (1|Chamber), data = SF.po, REML=F)
-plot(simulationOutput <- simulateResiduals(fittedModel=m.SF1, plot =F))
-summary(m.SF1)
-anova(m.SF1) # nothing is significant
+m.SF4 <- lmer(C ~ CO2 + Round + (1|Chamber), data = SF.po, REML=F)
+plot(simulationOutput <- simulateResiduals(fittedModel=m.SF4, plot =F))
+summary(m.SF4)
+anova(m.SF4) # nothing is significant
 
 ###################
 ## Experiment 1 
@@ -381,11 +331,10 @@ anova(m.SF1) # nothing is significant
 # remove plants, rounds, and chambers w/fewer than 3 samples
 H.short <- H.pollen %>% group_by(Plant, CO2, Round) %>% filter(n()>2) %>% ungroup()
 H.short <- H.short %>% filter(is.na(Omit))
+H.short$ratio <- H.short$C/H.short$N
 
 plants.1 <- c("Buckwheat","Melon", "Partridge pea", "Poppy", "Squash", "Sunflower", "Tomatillo", "Tomato")
 names(plants.1) <- c("buckwheat", "melon", "partridge pea", "poppy", "squash", "sunflower", "tomatillo", "tomato")
-
-H.short$ratio <- H.short$C/H.short$N
 
 N<-ggplot(H.short, aes(x= Plant, y = log(N), fill = CO2))+
   geom_violin()+
@@ -455,25 +404,23 @@ ggarrange(N, C, CN, nrow=3, ncol =1, align = "h")
 # Compare all plant species together 
 # N
 m.N <- lm(N ~ CO2*Plant + Round, data = H.short)
-plot(simulationOutput <- simulateResiduals(fittedModel=m.B, plot =F))
-summary(m.B)
-anova(m.B)
+plot(simulationOutput <- simulateResiduals(fittedModel=m.N, plot =F))
+summary(m.N)
+anova(m.N)
 
 # C:N ratio
-m.B <- lm(ratio ~ CO2*Plant + Round, data = H.short)
-plot(simulationOutput <- simulateResiduals(fittedModel=m.B, plot =F))
-summary(m.B)
-anova(m.B)
+m.CN <- lm(ratio ~ CO2*Plant + Round, data = H.short)
+plot(simulationOutput <- simulateResiduals(fittedModel=m.CN, plot =F))
+summary(m.CN)
+anova(m.CN)
 
 # %C
-m.B <- lm(C ~ CO2*Plant + Round, data = H.short)
-plot(simulationOutput <- simulateResiduals(fittedModel=m.B, plot =F))
-summary(m.B)
-anova(m.B)
-AIC(m.B) # 254.8034
-# sig effect of C, Plant species, so compare each plant species separately
+m.C <- lm(C ~ CO2*Plant + Round, data = H.short)
+plot(simulationOutput <- simulateResiduals(fittedModel=m.C, plot =F))
+summary(m.C)
+anova(m.C)
 
-# each plant species separately 
+# compare each plant species separately 
 ## Melon - only R1 
 M.po <- H.short %>% filter(Plant == "melon")
 # N
@@ -495,20 +442,20 @@ t.test(C~CO2, P.po)
 
 ## Squash - both rounds 
 S.po <- H.short %>% filter(Plant == "squash")
-m.B <- lm(N ~ CO2 + Round, data = S.po)
-plot(simulationOutput <- simulateResiduals(fittedModel=m.B, plot =F))
-summary(m.B)
-anova(m.B)
+m.S.N <- lm(N ~ CO2 + Round, data = S.po)
+plot(simulationOutput <- simulateResiduals(fittedModel=m.S.N, plot =F))
+summary(m.S.N)
+anova(m.S.N)
 # C
-m.B <- lm(C ~ CO2 + Round, data = S.po)
-plot(simulationOutput <- simulateResiduals(fittedModel=m.B, plot =F))
-summary(m.B)
-anova(m.B)
+m.S.C <- lm(C ~ CO2 + Round, data = S.po)
+plot(simulationOutput <- simulateResiduals(fittedModel=m.S.C, plot =F))
+summary(m.S.C)
+anova(m.S.C)
 # C:N
-m.B <- lm(ratio ~ CO2 + Round, data = S.po)
-plot(simulationOutput <- simulateResiduals(fittedModel=m.B, plot =F))
-summary(m.B)
-anova(m.B)
+m.S.CN <- lm(ratio ~ CO2 + Round, data = S.po)
+plot(simulationOutput <- simulateResiduals(fittedModel=m.S.CN, plot =F))
+summary(m.S.CN)
+anova(m.S.CN)
 
 ## Sunflower 
 SF.po <- H.short %>% filter(Plant == "sunflower")
