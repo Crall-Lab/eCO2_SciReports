@@ -4,17 +4,19 @@
 
 library("tidyverse")
 library("ggplot2")
+library("ggpubr")
 library("lme4")
+library("DHARMa")
 library("lmerTest")
+
 library("multilevelTools")
 library("JWileymisc")
 library("nlme")
 library("scales")
-library("beeswarm")
 library("see")
-library("DHARMa")
+
 library("GLMMadaptive")
-library("ggpubr")
+
 
 ##############################
 ## read in the data frames
@@ -38,72 +40,16 @@ W.pollen$ratio <- W.pollen$C/W.pollen$N
 
 ############################
 # summarize and plot data 
+# remove partridge pea, too few samples
 W.po.short <- W.pollen %>% filter(Plant_SP != "PP")
 
 # remove plants, rounds, and chambers w/fewer than 3 samples
 W.po.short <- W.po.short %>% group_by(Plant_SP, Chamber, Round) %>% filter(n()>2) %>% ungroup()
 # ok good this didn't change anything, small sample sizes already omitted
 
-# plot w/just CO2 treatments
-po.sum <- W.po.short %>% group_by(Plant_SP, CO2) %>%
-  dplyr::summarise(
-    count = n(),
-    mean = mean(log(N), na.rm = T),
-    sd = sd(log(N), na.rm = T)
-  )
-po.sum$se <- po.sum$sd/sqrt(po.sum$count)
-
-po.sum$CO2 <-factor(po.sum$CO2, levels = c(0, 1))
-po.sum$chemistry <- "N"
-
-po.sum1 <- W.po.short %>% group_by(Plant_SP, CO2) %>%
-  dplyr::summarise(
-    count = n(),
-    mean = mean(log(C), na.rm = T),
-    sd = sd(log(C), na.rm = T)
-  )
-po.sum1$se <- po.sum1$sd/sqrt(po.sum1$count)
-
-po.sum1$CO2 <-factor(po.sum1$CO2, levels = c(0, 1))
-po.sum1$chemistry <- "C"
-
-# log transfer to bring buckwheat back with everyone else
-W.po.short$log_ratio <- log(W.po.short$ratio)
-
-po.sum2 <- W.po.short %>% group_by(Plant_SP, CO2) %>%
-  dplyr::summarise(
-    count = n(),
-    mean = mean(ratio, na.rm = T),
-    sd = sd(ratio, na.rm = T)
-  )
-po.sum2$se <- po.sum2$sd/sqrt(po.sum2$count)
-
-po.sum2$CO2 <-factor(po.sum2$CO2, levels = c(0, 1))
-po.sum2$chemistry <- "log(C:N)"
-
-
-# put them all together
-WI.pc <- rbind(po.sum, po.sum1, po.sum2)
-WI.pc$chemistry <- factor(WI.pc$chemistry, levels = c("N", "C", "log(C:N)"))
-
 # plot it
-plants <- c("Borage", "Buckwheat","Red Clover", "Lacy Phacelia", "Nasturtium", "Sweet Alyssum", "Sunflower")
-names(plants) <- c("B", "BW", "C", "LP", "N", "SA", "SF")
-
-ggplot(WI.pc, aes(x=Plant_SP, y = mean, color = CO2))+
-  geom_point(position = position_dodge(w = 0.75), size = 2)+
-  geom_errorbar(aes(ymin=mean-se, ymax = mean+se), position = position_dodge(w = 0.75), width=0.2)+
-  theme_classic()+
-  theme(legend.position = "bottom",
-        axis.text.x = element_text(angle = 90))+
-  labs(y="Pollen chemistry ± se")+
-  scale_color_manual(values = c("grey","navyblue"), 
-                     labels = c("aCO2", "eCO2"),
-                     name = "Treatment")+
-  scale_x_discrete(labels = plants)+
-  facet_wrap(vars(chemistry), 
-             ncol = 1, 
-             scales = "free")
+plants.2 <- c("Borage", "Buckwheat","Red Clover", "Lacy Phacelia", "Nasturtium", "Sweet Alyssum", "Sunflower")
+names(plants.2) <- c("B", "BW", "C", "LP", "N", "SA", "SF")
 
 W.po.short$CO2 <- as.factor(W.po.short$CO2)
 
@@ -117,7 +63,7 @@ N<-ggplot(W.po.short, aes(x= Plant_SP, y = log(N), fill = CO2))+
   scale_color_manual(values = c("black", "navy"),
                      labels = c("aCO2", "eCO2"),
                      name = "CO2 Treatment")+
-  scale_x_discrete(labels = plants)+
+  scale_x_discrete(labels = plants.2)+
   theme(legend.position = "none",
         axis.text.x = element_blank(),
         axis.ticks.x=element_blank(),
@@ -139,7 +85,7 @@ C<- ggplot(W.po.short, aes(x= Plant_SP, y = C, fill = CO2))+
   scale_color_manual(values = c("black", "navy"),
                      labels = c("aCO2", "eCO2"),
                      name = "CO2 Treatment")+
-  scale_x_discrete(labels = plants)+
+  scale_x_discrete(labels = plants.2)+
   theme(legend.position = "none",
         axis.text.x = element_blank(),
         axis.ticks.x=element_blank(),
@@ -151,16 +97,6 @@ C<- ggplot(W.po.short, aes(x= Plant_SP, y = C, fill = CO2))+
                width=.75,
                position=position_dodge(0.9))
 
-#ggplot(W.po.short, aes(x= Plant_SP, y = C, fill = CO2))+
-#  geom_boxplot(aes(fill = CO2))+
-#  theme_classic()+
-#  scale_fill_manual(values = c("grey", "cornflowerblue"))+
-#  scale_x_discrete(labels = plants)+
-#  theme(legend.position = "none",
-#        axis.text.x = element_blank(),
-#        axis.ticks.x=element_blank(),
-#        axis.title.x=element_blank())
-
 CN<-ggplot(W.po.short, aes(x= Plant_SP, y = log(ratio), fill = CO2))+
   geom_violin()+
   geom_point(position=position_jitterdodge(), size = 0.5, alpha = 0.5, aes(color=CO2))+
@@ -171,7 +107,7 @@ CN<-ggplot(W.po.short, aes(x= Plant_SP, y = log(ratio), fill = CO2))+
   scale_color_manual(values = c("black", "navy"),
                      labels = c("aCO2", "eCO2"),
                      name = "CO2 Treatment")+
-  scale_x_discrete(labels = plants)+
+  scale_x_discrete(labels = plants.2)+
   theme(legend.position = "none",
         axis.text.x = element_text(angle = 90, hjust=1, size = .2),
         axis.title.x=element_blank())+
@@ -182,205 +118,33 @@ CN<-ggplot(W.po.short, aes(x= Plant_SP, y = log(ratio), fill = CO2))+
                width=.75,
                position=position_dodge(0.9))
 
-
-#ggplot(W.po.short, aes(x= Plant_SP, y = log(ratio), fill = CO2))+
-#geom_boxplot(aes(fill = CO2))+
-#theme_classic()+
-#scale_fill_manual(values = c("grey", "cornflowerblue"))+
-#theme(legend.position = "none",
-#      axis.text.x = element_text(angle = 90, hjust=1, size = .2),
-#      axis.title.x=element_blank())
-
+# add all to one plot
 ggarrange(N, C, CN, nrow=3, ncol = 1)
 
-
-# same but log transform the data? Maybe, come back to this later if needed
-
-po.sum <- W.po.short %>% group_by(Plant_SP, Chamber, Round) %>%
-  dplyr::summarise(
-    count = n(),
-    mean = mean(N, na.rm = T),
-    sd = sd(N, na.rm = T)
-  )
-po.sum$se <- po.sum$sd/sqrt(po.sum$count)
-
-# plot it
-plants <- c("Borage", "Buckwheat","Red Clover", "Lacy Phacelia", "Nasturtium", "Sweet Alyssum", "Sunflower")
-names(plants) <- c("B", "BW", "C", "LP", "N", "SA", "SF")
-
-po.sum$Round <-as.factor(po.sum$Round)
-
-ggplot(po.sum, aes(x=Round, y = mean, shape = Chamber))+
-  geom_point(position = position_dodge(w = 0.75), size = 2)+
-  geom_errorbar(aes(ymin=mean-se, ymax = mean+se), position = position_dodge(w = 0.75), width=0.2)+
-  theme_classic()+
-  theme(legend.position = c(.9,.2))+
-  labs(y="%N +/- se", x = "Experimental Round")+
-  scale_shape_manual(values = c(0,15,1,16), labels = c("60 - eCO2", "63 - eCO2", "62 - aCO2", "61 - aCO2"))+
-  facet_wrap(vars(Plant_SP), scales = "free",
-             labeller = labeller(Plant_SP = plants),
-             ncol = 4)
-
-po.sum1 <- W.po.short %>% group_by(Plant_SP, Chamber, Round) %>%
-  dplyr::summarise(
-    count = n(),
-    mean = mean(ratio, na.rm = T),
-    sd = sd(ratio, na.rm = T)
-  )
-po.sum1$se <- po.sum1$sd/sqrt(po.sum1$count)
-
-po.sum1$Round <-as.factor(po.sum1$Round)
-
-ggplot(po.sum1, aes(x=Round, y = mean, shape = Chamber))+
-  geom_point(position = position_dodge(w = 0.75), size = 2)+
-  geom_errorbar(aes(ymin=mean-se, ymax = mean+se), position = position_dodge(w = 0.75), width=0.2)+
-  theme_classic()+
-  theme(legend.position = c(.9,.2))+
-  labs(y="C:N ratio +/- se", x = "Experimental Round")+
-  scale_shape_manual(values = c(0,15,1,16), labels = c("60 - eCO2", "63 - eCO2", "62 - aCO2", "61 - aCO2"))+
-  facet_wrap(vars(Plant_SP), scales = "free",
-             labeller = labeller(Plant_SP = plants),
-             ncol = 4)
-
-# need to omit plant+chamber+round situations where there were less than three observations (pollen collections)
-# all PP
-
-# ok let's think about how to analyze this statistically
-# We need to include chamber as a random effect
-# Round as a fixed effect
-# Plant species 
-
-# N content as outcome variable
-# CO2 level as predictor variable
-# Plant species indicate which N observations belong to which plant
-
-# how many unique plants are there?
-length(unique(W.po.short$Plant)) # 8 - not pollen for dandelions, this is right
-
-# briefly explore each variable (really only would want to explore N)
-summary(W.po.short$N)
-
-# distribution of the variables visually
-tmp <- meanDecompose(N ~ Plant_SP, data = W.po.short)
-str(tmp)
-
-plot(testDistribution(tmp[["N by Plant_SP"]]$X,
-                      extremevalues = "theoretical", ev.perc = .001),
-     varlab = "Between Plant N%")
-
-plot(testDistribution(tmp[["N by residual"]]$X,
-                      extremevalues = "theoretical", ev.perc = .001),
-     varlab = "Within plant N%")
-
-###
+### analysis
 # N model
-# full model
 W.po.short1 <- W.po.short %>% filter(!is.na(N))
-m <- lmer(N ~ CO2*Plant_SP + Round + (1|Chamber), data = W.po.short, REML=F)
-plot(simulationOutput <- simulateResiduals(fittedModel = m, plot = F))
-plotResiduals(simulationOutput, form = W.po.short$Plant_SP)
-testDispersion(simulationOutput, alternative = "less")
-summary(simulationOutput)
-summary(m)
-anova(m)
-AIC(m) # 762.359
-# only plant species is significant and Round x Plant species, best fitting model
-
-# test w/o CO2 and see how it performs 
-m1 <- lmer(N ~ Round*Plant_SP + (1|Chamber), data = W.po.short, REML=F)
-plot(simulationOutput <- simulateResiduals(fittedModel = m1, plot = F))
-summary(m1)
-anova(m1)
-AIC(m1) # 746.531
-
-
-fitme(N~CO2*Plant_SP + Round + (1|Chamber), data = W.po.short, family = COMPoission())
-m.binom <- glmer(N ~ CO2*Plant_SP + Round + (1|Chamber), data = W.po.short, family = COMPoission(nu=))
-summary(m.binom) # AIC = 1187.6summary(m.binom) # AIC = 1187.6summary(m.binom) # AIC = 1187.6
-plot(simulationOutput <- simulateResiduals(fittedModel = m.binom, plot = F))
-
-
-anova(m, m1) # no significant difference
-
-# test w/formula James suggested
-m.1 <-lmer(N ~ CO2*Plant_SP + Round + (1|Chamber),  data = W.po.short, REML=F)
-summary(m.1)
-anova(m.1) # Plant SP and Round significant 
-AIC(m.1) # 827.3099
-
-# compare between the two:
-anova(m, m.1) # m is a significantly better fit, so we will stick with this for now 
+m.N <- lmer(N ~ CO2*Plant_SP + Round + (1|Chamber), data = W.po.short, REML=F)
+plot(simulationOutput <- simulateResiduals(fittedModel = m.N, plot = F))
+summary(m.N)
+anova(m.N) # plant sp, round significant
 
 ## C:N ratio
-m <- lmer(ratio ~ CO2*Plant_SP + Round + (1|Chamber), data = W.po.short, REML=F)
-testDispersion(m)
-simulationOutput <- simulateResiduals(fittedModel = m, plot = F)
-residuals(simulationOutput, quantileFunction = qnorm, outlierValues = c(-7,7))
-plot(simulationOutput)
-testDispersion(simulationOutput, alternative = "less")
-summary(m)
-anova(m) # only plant species significant 
-AIC(m) # 1488.357
-
-# remove CO2
-m1 <- lmer(ratio ~ Round*Plant_SP + (1|Chamber), data = W.po.short, REML=F)
-summary(m1)
-anova(m1) # only plant species significant 
-AIC(m1) # 1491.561
-
-anova(m, m1) # full model significantly better, ok so keep CO2 in
-
-# remove Round
-m2 <- lmer(ratio ~ CO2*Plant_SP + (1|Chamber), data = W.po.short, REML=F)
-summary(m2)
-anova(m2) #  plant species and CO2xPlant species significant - so something is happening w/CO2 at the plant species level 
-AIC(m2) # 1478.852
-
-anova(m, m2) # no difference between this and full model
-anova(m, m1, m2) # no difference between the three
-
-# forumla james suggested
-m3 <- lmer(ratio ~ CO2*Plant_SP + Round + (1|Chamber), data = W.po.short, REML=F)
-summary(m3)
-anova(m3) #  plant species and CO2xPlant species significant - so something is happening w/CO2 at the plant species level 
-AIC(m3) # 1480.653
-
-anova(m,m3) # no difference from full model
+m.CN <- lmer(ratio ~ CO2*Plant_SP + Round + (1|Chamber), data = W.po.short, REML=F)
+plot(simulationOutput <- simulateResiduals(fittedModel = m.CN, plot = F))
+summary(m.CN)
+anova(m.CN) # plant species, co2 x plant species significant 
 
 ####
 # %C
-qqPlot(W.po.short$C)
-m <- lmer(C ~ CO2*Round*Plant_SP + (1|Chamber), data = W.po.short, REML=F)
-testDispersion(m)
-simulationOutput <- simulateResiduals(fittedModel = m, plot = F)
-residuals(simulationOutput, quantileFunction = qnorm, outlierValues = c(-7,7))
-testDispersion(simulationOutput, alternative = "greater")
-plot(simulationOutput)
-summary(m)
-anova(m) # significant effect of Round and Plant species
-AIC(m) # 1190.176
+m.C <- lmer(C ~ CO2*Plant_SP + Round + (1|Chamber), data = W.po.short, REML=F)
+plot(simulationOutput <- simulateResiduals(fittedModel = m.C, plot = F))
+summary(m.C)
+anova(m.C) # significant effect of Round and Plant species
 
-# remove CO2
-m1 <- lmer(C ~ Round*Plant_SP + (1|Chamber), data = W.po.short, REML=F)
-summary(m1)
-anova(m1) # significant effect of Round and Plant species and Round x Plant sp
-AIC(m1) # 1167.712
+# compare each plant species independently
 
-anova(m, m1) # no difference between models
-
-# formula james suggested
-m2 <- lmer(C ~ CO2*Plant_SP + Round + (1|Chamber), data = W.po.short, REML=F)
-summary(m2)
-anova(m2) # significant effect of Round and Plant species and Round x Plant sp
-AIC(m2) # 1190.213
-
-anova(m, m2) # full model significantly better predictor than this. 
-
-# ok what if we compare each plant separately?
-
-########
 ## Borage
-########
 # %N (proxy for pollen protein)
 B.po <- W.pollen %>% filter(Plant_SP == "B")
 
