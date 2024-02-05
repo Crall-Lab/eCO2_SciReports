@@ -158,64 +158,23 @@ anova(m.B1, m.B2) # no sig difference, lower AIC for m.B1, so use that one
 anova(m.B1)
 anova(m.B2)
 
-# ok new model shows effect of CO2 and of Round, compare %N
-B.po.1 <- B.po %>% filter(Round == "1")
-t.test(N~CO2, data = B.po.1)
-##t(21.597) = -1.4346, p = 0.1657 # round 1 not significant 
-B.po.2 <- B.po %>% filter(Round == "2")
-t.test(N~CO2, data = B.po.2)
-##t(20.653) = -2.1287, p = 0.04549 # round 2 significant 
-
-sum <- B.po %>% group_by(CO2, Round) %>%
-  dplyr::summarise(
-    count = n(),
-    mean = mean(N, na.rm = T),
-    sd = sd(N, na.rm = T)
-  )
-sum$se <- sum$sd/sqrt(sum$count)
-
 # C:N ratio
-m.B2 <- lmer(ratio ~ CO2 + Round + (1|Chamber), data = B.po, REML=F)
-plot(simulationOutput <- simulateResiduals(fittedModel=m.B2, plot =F))
-m.B3 <- lmer(ratio ~ CO2 * Round + (1|Chamber), data = B.po, REML=F)
+m.B3 <- lmer(ratio ~ CO2 + Round + (1|Chamber), data = B.po, REML=F)
 plot(simulationOutput <- simulateResiduals(fittedModel=m.B3, plot =F))
-summary(m.B2)
+m.B4 <- lmer(ratio ~ CO2 * Round + (1|Chamber), data = B.po, REML=F)
+plot(simulationOutput <- simulateResiduals(fittedModel=m.B4, plot =F))
 summary(m.B3)
-anova(m.B2, m.B3) # no difference, but m.B2 has lower AIC 
-anova(m.B2) # Again, only Round is significant
-AIC(m.B2) # -5.510952
-
-# ok new model shows effect of CO2 and of Round, compare %N
-B.po.1 <- B.po %>% filter(Round == "1")
-t.test(ratio~CO2, data = B.po.1)
-##t(21.597) = -1.4346, p = 0.1657 # round 1 not significant 
-B.po.2 <- B.po %>% filter(Round == "2")
-t.test(ratio~CO2, data = B.po.2)
-##t(20.653) = -2.1287, p = 0.04549 # round 2 significant 
-
-sum <- B.po %>% group_by(CO2, Round) %>%
-  dplyr::summarise(
-    count = n(),
-    mean = mean(ratio, na.rm = T),
-    sd = sd(ratio, na.rm = T)
-  )
-sum$se <- sum$sd/sqrt(sum$count)
-
+summary(m.B4)
+anova(m.B4, m.B3) # no difference, but m.B2 has lower AIC 
+anova(m.B4) # Again, only Round is significant
 
 # C 
 m.B1 <- lmer(C ~ CO2 + Round + (1|Chamber), data = B.po, REML=F)
-testDispersion(m.B1)
-simulationOutput <- simulateResiduals(fittedModel = m.B1, plot = F)
-residuals(simulationOutput, quantileFunction = qnorm, outlierValues = c(-7,7))
-plot(simulationOutput)
+plot(simulationOutput <- simulateResiduals(fittedModel = m.B1, plot = F))
 summary(m.B1)
 anova(m.B1) # only round is significant
-AIC(m.B1) # 132.6573
 
-
-#######
 ## Buckwheat
-#########
 # %N (proxy for pollen protein)
 BW.po <- W.pollen %>% filter(Plant_SP == "BW")
 
@@ -227,26 +186,10 @@ summary(m.BW1)
 anova(m.BW1)# significant effect of CO2, CO2 increases %N
 anova(m.BW2)
 anova(m.BW1, m.BW2) # virtually no difference between models
-AIC(m.BW1) # 45.4868
-
-t.test(N~CO2, data = BW.po)
-# significant difference of N between CO2 treatments
-# t(35.032) = -2.1971, p = 0.03472
-
-BW.p.sum <- BW.po %>% group_by(CO2) %>%
-  dplyr::summarise(
-    count = n(),
-    mean = mean(N, na.rm = T),
-    sd = sd(N, na.rm = T)
-  )
-BW.p.sum$se <- BW.p.sum$sd/sqrt(BW.p.sum$count)
 
 # C 
 m.B1 <- lmer(C ~ CO2 + Round + (1|Chamber), data = BW.po, REML=F)
-testDispersion(m.B1)
-simulationOutput <- simulateResiduals(fittedModel = m.B1, plot = F)
-residuals(simulationOutput, quantileFunction = qnorm, outlierValues = c(-7,7))
-plot(simulationOutput)
+plot(simulationOutput <- simulateResiduals(fittedModel = m.B1, plot = F))
 summary(m.B1)
 anova(m.B1) # nothing significant
 AIC(m.B1) # 219.5807
@@ -261,9 +204,7 @@ summary(m.B1)
 anova(m.B1) # nothing significant
 AIC(m.B1) # 322.9815
 
-######
 ## Red Clover
-######
 # %N (proxy for pollen protein)
 C.po <- W.pollen %>% filter(Plant_SP == "C")
 
