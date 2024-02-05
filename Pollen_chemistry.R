@@ -21,9 +21,7 @@ library("ggpubr")
 W.pollen<-read.csv(file = "Pollen_chemistry_exp2.csv", header = T, na.strings = c("", "NULLL"))
 H.pollen <- read.csv(file = "Pollen_chemistry_exp1.csv", header = T, na.string = c("", "NULL"))
 
-## apply any file modifications you need for R to run properly (i.e. tell R something 
-## is a date, remove weird points, combine data frames, etc.)
-
+# clean data frames
 # Pollen nutrition exp 1
 H.pollen <- H.pollen %>% filter(is.na(Omit))
 H.pollen$CO2 <- as.factor(H.pollen$CO2)
@@ -39,7 +37,6 @@ W.pollen <- W.pollen %>% filter(is.na(OMIT))
 W.pollen$ratio <- W.pollen$C/W.pollen$N
 
 ############################
-
 # summarize and plot data 
 W.po.short <- W.pollen %>% filter(Plant_SP != "PP")
 
@@ -587,9 +584,7 @@ AIC(m.LP3) # 240.0096
 
 anova(m.LP2, m.LP3) # no difference
 
-######
 ## Nasturtium
-#########
 # %N (proxy for pollen protein)
 N.po <- W.pollen %>% filter(Plant_SP == "N")
 
@@ -601,48 +596,19 @@ summary(m.N1)
 anova(m.N1) # No significant difference by round or CO2 level, but effect of round
 anova(m.N1, m.N2) # no significant difference, slightly lower AIC in m.N1
 
-t.test(N~CO2, data = N.po)
-# significant difference of N between CO2 treatments
-# t(26.831) = 2.4192, p = 0.02262
-
-BW.p.sum <- N.po %>% group_by(CO2) %>%
-  dplyr::summarise(
-    count = n(),
-    mean = mean(N, na.rm = T),
-    sd = sd(N, na.rm = T)
-  )
-BW.p.sum$se <- BW.p.sum$sd/sqrt(BW.p.sum$count)
-
-
 # C:N ratio
 m.N2 <- lmer(ratio ~ CO2 + Round + (1|Chamber), data = N.po, REML=F)
 plot(simulationOutput <- simulateResiduals(fittedModel=m.N2, plot =F))
 summary(m.N2)
 anova(m.N2) # No significant difference by round or CO2 level, but effect of round
-AIC(m.N2) # 93.3949
-
-t.test(ratio~CO2, data = N.po)
-# significant difference of N between CO2 treatments
-# t(26.687) = -2.2475, p = 0.03308
-
-BW.p.sum <- N.po %>% group_by(CO2) %>%
-  dplyr::summarise(
-    count = n(),
-    mean = mean(ratio, na.rm = T),
-    sd = sd(ratio, na.rm = T)
-  )
-BW.p.sum$se <- BW.p.sum$sd/sqrt(BW.p.sum$count)
 
 # C 
 m.N2 <- lmer(C ~ CO2 + Round + (1|Chamber), data = N.po, REML=F)
 plot(simulationOutput <- simulateResiduals(fittedModel=m.N2, plot =F))
 summary(m.N2)
 anova(m.N2) # nothing is significant
-AIC(m.N2) # 116.3554
 
-#######
 ## Partridge pea
-######
 # %N (proxy for pollen protein)
 PP.po <- W.pollen %>% filter(Plant_SP == "PP")
 
@@ -658,10 +624,7 @@ m.N1 <- lmer(ratio ~ CO2 + (1|Chamber), data = PP.po, REML=F)
 plot(simulationOutput <- simulateResiduals(fittedModel=m.N1, plot =F))
 summary(m.N1)
 
-
-##############
 ## Sweet Alyssum 
-###########
 # %N (proxy for pollen protein)
 SA.po <- W.pollen %>% filter(Plant_SP == "SA")
 
@@ -669,25 +632,20 @@ m.SA1 <- lmer(N ~ CO2 + Round + (1|Chamber), data = SA.po, REML=F)
 plot(simulationOutput <- simulateResiduals(fittedModel=m.SA1, plot =F))
 m.SA2 <- lmer(N ~ CO2 * Round + (1|Chamber), data = SA.po, REML = F)
 anova(m.SA1, m.SA2) # No significant difference by round or CO2 level, but effect of round
-AIC(m.SA1) # 42.00815
 
 # C:N ratio
 m.SA2 <- lmer(ratio ~ CO2 + Round + (1|Chamber), data = SA.po, REML=F)
 plot(simulationOutput <- simulateResiduals(fittedModel=m.SA2, plot =F))
 summary(m.SA2)
 anova(m.SA2) # No significant difference by round or CO2 level, but effect of round
-AIC(m.SA2) # 117.8179
 
 # C 
 m.SA2 <- lmer(C ~ CO2 + Round + (1|Chamber), data = SA.po, REML=F)
 plot(simulationOutput <- simulateResiduals(fittedModel=m.SA2, plot =F))
 summary(m.SA2)
 anova(m.SA2) # nothing is significant
-AIC(m.SA2) # 100.4652
 
-########
-## Sun Flower 
-########
+## Sunflower 
 # %N (proxy for pollen protein)
 SF.po <- W.pollen %>% filter(Plant_SP == "SF")
 
@@ -699,54 +657,21 @@ anova(m.SF1, m.SF2)
 summary(m.SF1)
 anova(m.SF1) # CO2, Round, and the interaction are significant
 anova(m.SF2)
-AIC(m.SF1) # 31.44163
-SF.po1 <- SF.po %>% filter(Round == "1")
-t.test(N ~ CO2, data = SF.po1)
-
-SF.po2 <- SF.po %>% filter(Round == "2")
-t.test(N ~ CO2, data = SF.po2)
-
-SF.sum <- SF.po %>% group_by(CO2, Round) %>%
-  dplyr::summarise(
-    count = n(),
-    mean = mean(N, na.rm = T),
-    sd = sd(N, na.rm = T)
-  )
-SF.sum$se <- SF.sum$sd/sqrt(SF.sum$count)
 
 # C:N ratio
 m.SF2 <- lmer(ratio ~ CO2 + Round + (1|Chamber), data = SF.po, REML=F)
 plot(simulationOutput <- simulateResiduals(fittedModel=m.SF2, plot =F))
 summary(m.SF2)
 anova(m.SF2) # CO2, Round, and the interaction are significant
-AIC(m.SF2) # 113.4728
-
-t.test(ratio ~ CO2, data = SF.po1)
-t.test(ratio ~ CO2, data = SF.po2)
-
-SF.sum <- SF.po %>% group_by(CO2, Round) %>%
-  dplyr::summarise(
-    count = n(),
-    mean = mean(ratio, na.rm = T),
-    sd = sd(ratio, na.rm = T)
-  )
-SF.sum$se <- SF.sum$sd/sqrt(SF.sum$count)
 
 # % C
 m.SF1 <- lmer(C ~ CO2 + Round + (1|Chamber), data = SF.po, REML=F)
 plot(simulationOutput <- simulateResiduals(fittedModel=m.SF1, plot =F))
 summary(m.SF1)
 anova(m.SF1) # nothing is significant
-AIC(m.SF1) # 254.1714
 
 ###################
-## Harvard data 
-##################
-
-##################
-## pollen - %N & C:N ratio
-#################
-# summarize and plot data 
+## Experiment 1 
 
 # remove plants, rounds, and chambers w/fewer than 3 samples
 H.short <- H.pollen %>% group_by(Plant, CO2, Round) %>% filter(n()>2) %>% ungroup()
