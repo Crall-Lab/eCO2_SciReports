@@ -1,5 +1,5 @@
 ## Bernauer et al. (in prep for SciReports) Elevated atmospheric CO2 has 
-  ## inconsistent effects on pollen chemistry and plant growth across
+  ## small, species-specific effects on pollen chemistry and plant growth across
   ## flowering plant species
 
 # script to plot and analyze greenhouse CO2 logger data
