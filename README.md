@@ -1,5 +1,5 @@
 # eCO2_SciReports
-Code and data files used for analyses and figure making for Bernauer et al. in prep. - <i>"Elevated atmospheric CO<sub>2</sub> has inconsistent effects on pollen chemistry and plant growth across flowering plant species"</i>.  
+Code and data files used for analyses and figure making for Bernauer et al. in prep. - <i>"Elevated atmospheric CO<sub>2</sub> has small, species-specific effects on pollen chemistry and plant growth across flowering plant species"</i>.  
 Data and code for this manuscript can also be found on Dryad: Effects of eCO<sub>2</sub> on plant growth and pollen chemistry in 14 angiosperms at <https://doi.org/10.5061/dryad.70rxwdc5n>
 
 # Datasets
