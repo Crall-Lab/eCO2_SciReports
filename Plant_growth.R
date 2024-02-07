@@ -110,7 +110,7 @@ anova(m.1)
 # try ln-transforming data to improve normality
 m.2 <- lmer(log(Height_cm) ~ CO2*Plant + Round + week + (1|Chamber), data = height, REML=F)
 plot(simulationOutput <- simulateResiduals(fittedModel=m.2, plot =F))
-anova(m.1, m.2) # equivalent model fit, lower AIC in ln-transformed model - go with that one. 
+anova(m.1, m.2)  
 anova(m.2) 
 
 # compare each individual plant species separately
@@ -123,7 +123,7 @@ plot(simulationOutput <- simulateResiduals(fittedModel=m.B1, plot =F))
 m.B1.log <- lmer(log(Height_cm) ~ CO2 + Round + week + (1|Chamber), data = h.B, REML=F)
 plot(simulationOutput <- simulateResiduals(fittedModel=m.B1.log, plot =F))
 
-anova(m.B1, m.B1.log) # no difference, but much lower AIC for m.B1.log
+anova(m.B1, m.B1.log) 
 summary(m.B1.log) # No significant difference by CO2 
 
 ## Buckwheat
@@ -134,8 +134,21 @@ plot(simulationOutput <- simulateResiduals(fittedModel=m.BW1, plot =F))
 # try ln-transforming height data
 m.BW1.log <- lmer(log(Height_cm) ~ CO2 + Round + week + (1|Chamber), data = h.BW, REML=F)
 plot(simulationOutput <- simulateResiduals(fittedModel=m.BW1.log, plot =F))
-anova(m.BW1, m.BW1.log) # no difference but AIC is lower for ln-transformed data
+anova(m.BW1, m.BW1.log) 
 summary(m.BW1.log) # CO2 is significant
+
+# Make predictions using fixed effect only and then compare differences at week 10
+pred.h.BW <- h.BW %>% 
+  mutate(pred_fixef = predict(m.BW1.log, newdata = ., re.form = NA),
+         pred_ranef = predict(m.BW1.log, newdata = ., re.form = NA))
+
+pred.h.BW.sum <- h.BW %>% group_by(CO2, week) %>%
+  dplyr::summarise(
+    count = n(),
+    mean = mean(Height_cm, na.rm = T),
+    sd = sd(Height_cm, na.rm = T)
+  )
+pred.h.BW.sum$se <- pred.h.BW.sum$sd/sqrt(pred.h.BW.sum$count)
 
 ## Clover
 h.C <- height %>% filter(Plant == "C")
@@ -143,13 +156,13 @@ m.C1 <- lmer(Height_cm ~ CO2 + Round + week + (1|Chamber), data = h.C, REML=F)
 plot(simulationOutput <- simulateResiduals(fittedModel=m.C1, plot =F))
 m.C1.log <- lmer(log(Height_cm) ~ CO2 + Round + week + (1|Chamber), data = h.C, REML=F)
 plot(simulationOutput <- simulateResiduals(fittedModel=m.C1.log, plot =F))
-anova(m.C1, m.C1.log) # = explanation, lower AIC w/log-transformed
+anova(m.C1, m.C1.log) 
 summary(m.C1.log) # no significant effect of round or of CO2 
 
 # what if we remove round from the model
 m.C1.log1 <- lmer(log(Height_cm) ~ CO2 + week + (1|Chamber), data = h.C, REML=F)
 plot(simulationOutput <- simulateResiduals(fittedModel=m.C1.log1, plot =F))
-anova(m.C1.log, m.C1.log1) # = explanation, lower AIC w/o round
+anova(m.C1.log, m.C1.log1) 
 summary(m.C1.log1) # CO2 not significant 
 
 ## Dandelion
@@ -160,7 +173,7 @@ m.D1 <- lmer(Height_cm ~ CO2 + week + (1|Chamber), data = h.D, REML=F)
 plot(simulationOutput <- simulateResiduals(fittedModel=m.D1, plot =F))
 m.D1.log <- lmer(log(Height_cm) ~ CO2 + week + (1|Chamber), data = h.D, REML=F)
 plot(simulationOutput <- simulateResiduals(fittedModel=m.D1.log, plot =F))
-anova(m.D1, m.D1.log) # no difference in model fit, but AIC lower for ln-transformed data
+anova(m.D1, m.D1.log) 
 summary(m.D1.log) # No significant difference by CO2 level, only week
 
 ## Lacy Phacelia
@@ -170,7 +183,7 @@ m.LP1 <- lmer(Height_cm ~ CO2 + Round + week + (1|Chamber), data = h.LP, REML=F)
 plot(simulationOutput <- simulateResiduals(fittedModel=m.LP1, plot =F))
 m.LP1.log <- lmer(log(Height_cm) ~ CO2 + Round + week + (1|Chamber), data = h.LP, REML=F)
 plot(simulationOutput <- simulateResiduals(fittedModel=m.LP1.log, plot =F))
-anova(m.LP1,m.LP1.log) # = explanation, lower AIC when ln-transformed
+anova(m.LP1,m.LP1.log) 
 summary(m.LP1.log) # no significant effect of CO2 
 
 ## Nasturtium
@@ -180,7 +193,7 @@ m.N1 <- lmer(Height_cm ~ CO2 + Round + week + (1|Chamber), data = h.N, REML=F)
 plot(simulationOutput <- simulateResiduals(fittedModel=m.N1, plot =F))
 m.N1.log <- lmer(log(Height_cm) ~ CO2 + Round + week + (1|Chamber), data = h.N, REML=F)
 plot(simulationOutput <- simulateResiduals(fittedModel=m.N1.log, plot =F))
-anova(m.N1, m.N1.log) # = explanation, lower AIC when ln-transformed
+anova(m.N1, m.N1.log) 
 summary(m.N1.log)# No significant difference by CO2 level
 
 ## Partridge pea
@@ -191,7 +204,7 @@ m.PP1 <- lmer(Height_cm ~ CO2+week + (1|Chamber), data = h.PP, REML=F)
 plot(simulationOutput <- simulateResiduals(fittedModel=m.PP1, plot =F))
 m.PP1.log <- lmer(log(Height_cm) ~ CO2 + week + (1|Chamber), data = h.PP, REML=F)
 plot(simulationOutput <- simulateResiduals(fittedModel=m.PP1.log, plot =F))
-anova(m.PP1, m.PP1.log) # = explanation, lower AIC when ln-transformed
+anova(m.PP1, m.PP1.log) 
 summary(m.PP1.log) # only week is significant
 
 ## Sweet alyssum
@@ -201,7 +214,7 @@ m.SA1 <- lmer(Height_cm ~ CO2 + Round+ week + (1|Chamber), data = h.SA, REML=F)
 plot(simulationOutput <- simulateResiduals(fittedModel=m.SA1, plot =F))
 m.SA1.log <- lmer(log(Height_cm) ~ CO2 + Round + week + (1|Chamber), data = h.SA, REML=F)
 plot(simulationOutput <- simulateResiduals(fittedModel=m.SA1.log, plot =F))
-anova(m.SA1, m.SA1.log) # = explanation, lower AIC when ln-transformed
+anova(m.SA1, m.SA1.log) 
 summary(m.SA1.log) # No significant difference by CO2 level, only round and date
 
 ## Sunflower 
@@ -258,12 +271,12 @@ m.B1 <- lmer(Leaf_no ~ CO2 + Round + week + (1|Chamber), data = l.B, REML=F)
 plot(simulationOutput <- simulateResiduals(fittedModel=m.B1, plot =F))
 m.B1.log <- lmer(log(Leaf_no) ~ CO2 + Round + week + (1|Chamber), data = l.B, REML=F)
 plot(simulationOutput <- simulateResiduals(fittedModel=m.B1.log, plot =F))
-anova(m.B1, m.B1.log) # equal explanation, lower AIC when ln-transformed
+anova(m.B1, m.B1.log)
 summary(m.B1.log) # round not significant, compare w/o round
 
 m.B1.log2 <- lmer(log(Leaf_no) ~CO2 + week + (1|Chamber), data = l.B, REML = F)
 plot(simulationOutput <- simulateResiduals(fittedModel=m.B1.log2, plot =F))
-anova(m.B1.log, m.B1.log2) # model slightly lower AIC w/o Round, go with that. 
+anova(m.B1.log, m.B1.log2)  
 summary(m.B1.log2) # No significant difference by CO2 level, only week
 
 ## Buckwheat
@@ -273,7 +286,7 @@ m.BW1 <- lmer(Leaf_no ~ CO2 + Round + week + (1|Chamber), data = l.BW, REML=F)
 plot(simulationOutput <- simulateResiduals(fittedModel=m.BW1, plot =F))
 m.BW1.log <- lmer(log(Leaf_no) ~ CO2 + Round + week + (1|Chamber), data = l.BW, REML=F)
 plot(simulationOutput <- simulateResiduals(fittedModel=m.BW1.log, plot =F))
-anova(m.BW1, m.BW1.log) # ln-transformed w/lower AIC
+anova(m.BW1, m.BW1.log) 
 summary(m.BW1.log) # no effect of CO2
 
 ## Clover
@@ -283,7 +296,7 @@ m.C1 <- lmer(Leaf_no ~ CO2 + Round + week + (1|Chamber), data = l.C, REML=F)
 plot(simulationOutput <- simulateResiduals(fittedModel=m.C1, plot =F))
 m.C1.log <- lmer(log(Leaf_no) ~ CO2 + Round + week + (1|Chamber), data = l.C, REML=F)
 plot(simulationOutput <- simulateResiduals(fittedModel=m.C1.log, plot =F))
-anova(m.C1, m.C1.log) # ln-transformed w/lower AIC
+anova(m.C1, m.C1.log) 
 summary(m.C1.log) # CO2 not significant 
 
 ## Dandelion
@@ -294,7 +307,7 @@ m.D1 <- lmer(Leaf_no ~ CO2 + week + (1|Chamber), data = l.D, REML=F)
 plot(simulationOutput <- simulateResiduals(fittedModel=m.D1, plot =F))
 m.D1.log <- lmer(log(Leaf_no) ~ CO2 + week + (1|Chamber), data = l.D, REML=F)
 plot(simulationOutput <- simulateResiduals(fittedModel=m.D1.log, plot =F))
-anova(m.D1, m.D1.log) #ln-transformed lower AIC
+anova(m.D1, m.D1.log) 
 summary(m.D1.log) # week significant
 
 ## Lacy Phacelia
@@ -304,7 +317,7 @@ m.LP1 <- lmer(Leaf_no ~ CO2 + Round + week + (1|Chamber), data = l.LP, REML=F)
 plot(simulationOutput <- simulateResiduals(fittedModel=m.LP1, plot =F))
 m.LP1.log <- lmer(log(Leaf_no) ~ CO2 + Round + week + (1|Chamber), data = l.LP, REML=F)
 plot(simulationOutput <- simulateResiduals(fittedModel=m.LP1.log, plot =F))
-anova(m.LP1, m.LP1.log) #ln-transformed lower AIC
+anova(m.LP1, m.LP1.log) 
 summary(m.LP1.log) # round not significant compare models w/o round
 
 m.LP1.log2 <- lmer(log(Leaf_no) ~ CO2 + week + (1|Chamber), data = l.LP, REML=F)
@@ -318,13 +331,26 @@ m.N1 <- lmer(Leaf_no ~ CO2+Round+week + (1|Chamber), data = l.N, REML=F)
 plot(simulationOutput <- simulateResiduals(fittedModel=m.N1, plot =F))
 m.N1.log <- lmer(log(Leaf_no) ~ CO2+Round+week + (1|Chamber), data = l.N, REML=F)
 plot(simulationOutput <- simulateResiduals(fittedModel=m.N1.log, plot =F))
-anova(m.N1, m.N1.log) #ln-transformed lower AIC
+anova(m.N1, m.N1.log) 
 summary(m.N1.log) # Co2, week significant
+
+# Make predictions using fixed effect only and then random effects and plot the results
+pred.l.N <- l.N %>% 
+  mutate(pred_fixef = predict(m.BW1.log, newdata = ., re.form = NA),
+         pred_ranef = predict(m.BW1.log, newdata = ., re.form = NA))
+
+pred.l.N.sum <- l.N %>% group_by(CO2, week) %>%
+  dplyr::summarise(
+    count = n(),
+    mean = mean(Leaf_no, na.rm = T),
+    sd = sd(Leaf_no, na.rm = T)
+  )
+pred.l.N.sum$se <- pred.l.N.sum$sd/sqrt(pred.l.N.sum$count)
 
 # try without round
 m.N1.log2 <- lmer(log(Leaf_no) ~ CO2+week + (1|Chamber), data = l.N, REML=F)
 plot(simulationOutput <- simulateResiduals(fittedModel=m.N1.log2, plot =F))
-anova(m.N1.log2, m.N1.log) # lower AIC w/o round
+anova(m.N1.log2, m.N1.log) 
 summary(m.N1.log2)
 
 ## Partridge Pea
