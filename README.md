@@ -2,6 +2,8 @@
 Code and data files used for analyses and figure making for Bernauer et al. in prep. - <i>"Elevated atmospheric CO<sub>2</sub> has small, species-specific effects on pollen chemistry and plant growth across flowering plant species"</i>.  
 Data and code for this manuscript can also be found on Dryad: Effects of eCO<sub>2</sub> on plant growth and pollen chemistry in 14 angiosperms at <https://doi.org/10.5061/dryad.70rxwdc5n>
 
+Maintainer: Olivia M. Bernauer (email: (ADD LINK) olivia.bernauer@gmail.com)
+
 # Datasets
 Here is a list of the included data sets included here and used for analyses in the manuscript. 
 
