@@ -142,11 +142,13 @@ pred.h.BW <- h.BW %>%
   mutate(pred_fixef = predict(m.BW1.log, newdata = ., re.form = NA),
          pred_ranef = predict(m.BW1.log, newdata = ., re.form = NA))
 
-pred.h.BW.sum <- h.BW %>% group_by(CO2, week) %>%
+pred.h.BW$pred_fixef_cm <- exp(pred.h.BW$pred_fixef)
+
+pred.h.BW.sum <- pred.h.BW %>% group_by(CO2, week) %>%
   dplyr::summarise(
     count = n(),
-    mean = mean(Height_cm, na.rm = T),
-    sd = sd(Height_cm, na.rm = T)
+    mean = mean(pred_fixef_cm, na.rm = T),
+    sd = sd(pred_fixef_cm, na.rm = T)
   )
 pred.h.BW.sum$se <- pred.h.BW.sum$sd/sqrt(pred.h.BW.sum$count)
 
@@ -261,7 +263,7 @@ plot(simulationOutput <- simulateResiduals(fittedModel=m.B1, plot =F))
 # see if ln-transformation is a better fit
 m.B1.log <- lmer(log(Leaf_no) ~ CO2*Plant + Round + week + (1|Chamber), data = leaves, REML=F)
 plot(simulationOutput <- simulateResiduals(fittedModel=m.B1.log, plot =F))
-anova(m.B1, m.B1.log) # yes, AIC lower after ln-transformation, = explanation of variation in data
+anova(m.B1, m.B1.log) 
 anova(m.B1.log) # CO2 not significant, but Plant species and Co2 x Plant species, so compare each species alone
 
 ## Borage
@@ -336,14 +338,16 @@ summary(m.N1.log) # Co2, week significant
 
 # Make predictions using fixed effect only and then random effects and plot the results
 pred.l.N <- l.N %>% 
-  mutate(pred_fixef = predict(m.BW1.log, newdata = ., re.form = NA),
-         pred_ranef = predict(m.BW1.log, newdata = ., re.form = NA))
+  mutate(pred_fixef = predict(m.N1.log, newdata = ., re.form = NA),
+         pred_ranef = predict(m.N1.log, newdata = ., re.form = NA))
 
-pred.l.N.sum <- l.N %>% group_by(CO2, week) %>%
+pred.l.N$pred_fixef_leaf <- exp(pred.l.N$pred_fixef)
+
+pred.l.N.sum <- pred.l.N %>% group_by(CO2, week) %>%
   dplyr::summarise(
     count = n(),
-    mean = mean(Leaf_no, na.rm = T),
-    sd = sd(Leaf_no, na.rm = T)
+    mean = mean(pred_fixef_leaf, na.rm = T),
+    sd = sd(pred_fixef_leaf, na.rm = T)
   )
 pred.l.N.sum$se <- pred.l.N.sum$sd/sqrt(pred.l.N.sum$count)
 
@@ -361,7 +365,7 @@ m.PP1 <- lmer(Leaf_no ~ CO2 + week + (1|Chamber), data = l.PP, REML=F)
 plot(simulationOutput <- simulateResiduals(fittedModel=m.PP1, plot =F))
 m.PP1.log <- lmer(log(Leaf_no) ~ CO2 + week + (1|Chamber), data = l.PP, REML=F)
 plot(simulationOutput <- simulateResiduals(fittedModel=m.PP1.log, plot =F))
-anova(m.PP1, m.PP1.log) # lower AIC w/ln-transformation
+anova(m.PP1, m.PP1.log) 
 summary(m.PP1.log) # co2 not significant 
 
 ## Sweet alyssum 
@@ -371,8 +375,8 @@ m.SA1 <- lmer(Leaf_no ~ CO2+Round+week + (1|Chamber), data = l.SA, REML=F)
 plot(simulationOutput <- simulateResiduals(fittedModel=m.SA1, plot =F))
 m.SA1.log <- lmer(log(Leaf_no) ~ CO2+Round+week + (1|Chamber), data = l.SA, REML=F)
 plot(simulationOutput <- simulateResiduals(fittedModel=m.SA1.log, plot =F))
-anova(m.SA1, m.SA1.log) # lower AIC w/ln-transformation
-summary(m.SA1.log)n# No significant difference by CO2 level
+anova(m.SA1, m.SA1.log) 
+summary(m.SA1.log) # No significant difference by CO2 level
 
 ## Sunflower
 l.SF <- leaves %>% filter(Plant == "SF")
@@ -381,7 +385,7 @@ m.SF1 <- lmer(Leaf_no ~ CO2+Round+week + (1|Chamber), data = l.SF, REML=F)
 plot(simulationOutput <- simulateResiduals(fittedModel=m.SF1, plot =F))
 m.SF1.log <- lmer(log(Leaf_no) ~ CO2+Round+week + (1|Chamber), data = l.SF, REML=F)
 plot(simulationOutput <- simulateResiduals(fittedModel=m.SF1.log, plot =F))
-anova(m.SF1, m.SF1.log) # lower AIC w/ln-transformation
+anova(m.SF1, m.SF1.log) 
 summary(m.SF1.log) # CO2 not significant
 
 ###################
@@ -435,6 +439,23 @@ m.BW2 <- glmer.nb(Flower_no ~ CO2 + Round + datenum + (1|Chamber),
 plot(simulationOutput <- simulateResiduals(fittedModel=m.BW2, plot =F))
 car::Anova(m.BW2) # report this
 
+
+newdata1 <- data.frame(datenum = 70, CO2 = factor(0:1, levels = 0:1), Round = factor(1:2, levels = 1:2))
+newdata1$phat <- predict(m.BW2, newdata1, type = "response", re.form = NA)
+newdata1
+
+# Make predictions using fixed effect only and then random effects and plot the results
+pred.f.BW <- f.BW %>% 
+  mutate(pred_fixef = predict(m.BW2, type = "response", re.form = NA))
+
+pred.f.BW.sum <- pred.f.BW %>% group_by(CO2, week) %>%
+  dplyr::summarise(
+    count = n(),
+    mean = mean(pred_fixef, na.rm = T),
+    sd = sd(pred_fixef, na.rm = T)
+  )
+pred.f.BW.sum$se <- pred.f.BW.sum$sd/sqrt(pred.f.BW.sum$count)
+
 ## Clover
 f.C <- flowers %>% filter(Plant == "C")
 
@@ -442,6 +463,24 @@ m.C2 <- glmer.nb(Flower_no ~ CO2 + Round + datenum + (1|Chamber),
                  data = f.C)
 plot(simulationOutput <- simulateResiduals(fittedModel=m.C2, plot =F))
 car::Anova(m.C2) # report this
+
+newdata1 <- data.frame(datenum = 70, CO2 = factor(0:1, levels = 0:1), Round = factor(1:2, levels = 1:2))
+newdata1$phat <- predict(m.C2, newdata1, type = "response", re.form = NA)
+newdata1
+
+
+# Make predictions using fixed effect only and then random effects and plot the results
+pred.f.C <- f.C %>% 
+  mutate(pred_fixef = predict(m.C2, newdata = ., re.form = NA),
+         pred_ranef = predict(m.C2, newdata = ., re.form = NA))
+
+pred.f.C.sum <- pred.f.C %>% group_by(CO2, week) %>%
+  dplyr::summarise(
+    count = n(),
+    mean = mean(Flower_no, na.rm = T),
+    sd = sd(Flower_no, na.rm = T)
+  )
+pred.f.C.sum$se <- pred.f.C.sum$sd/sqrt(pred.f.C.sum$count)
 
 ## Lacy Phacelia
 f.LP <- flowers %>% filter(Plant == "LP")
@@ -458,6 +497,19 @@ m.N2 <- glmer.nb(Flower_no ~ CO2 + Round + datenum + (1|Chamber),
                  data = f.N)
 plot(simulationOutput <- simulateResiduals(fittedModel=m.N2, plot =F))
 car::Anova(m.N2) # report this
+
+# Make predictions using fixed effect only and then random effects and plot the results
+pred.f.N <- f.N %>% 
+  mutate(pred_fixef = predict(m.N2, newdata = ., re.form = NA),
+         pred_ranef = predict(m.N2, newdata = ., re.form = NA))
+
+pred.f.N.sum <- pred.f.N %>% group_by(CO2, week) %>%
+  dplyr::summarise(
+    count = n(),
+    mean = mean(Flower_no, na.rm = T),
+    sd = sd(Flower_no, na.rm = T)
+  )
+pred.f.BW.sum$se <- pred.f.BW.sum$sd/sqrt(pred.f.BW.sum$count)
 
 ## Partridge pea
 f.PP <- flowers %>% filter(Plant == "PP")
