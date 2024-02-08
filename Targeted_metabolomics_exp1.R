@@ -6,6 +6,8 @@
 
 library(ggplot2)
 library(tidyverse)
+library(ggfortify)
+library(plotly)
 
 #Load and clean data
 data <- read.csv('Pollen_metabolomics_exp1.csv')
@@ -19,8 +21,8 @@ data.1 <- data.1 %>% filter(species != "squash")
 # also remove tomato for small sample sizes
 data.1 <- data.1 %>% filter(species != "tomato")
 
-#Get list of columns with reasonable data representation across species
-cls <- c(6, 12, 13, 14, 15, 16, 19, 21, 22, 23)
+#Separate out amino acids 
+cls <- c(6, 12, 13, 15, 16, 19, 21, 22, 23)
 
 #Convert columns to numeric
 for(i in 1:length(cls)){
@@ -33,6 +35,7 @@ pc.data.1 <- data.1[,cls]
 ind <- complete.cases(pc.data.1)
 pc.data.1 <- pc.data.1[ind,]
 pca.1 <- prcomp(pc.data.1, scale= TRUE)
+summary(pca.1)
 
 #Write PCs back to original data frame
 data.1$PC1[ind] <- pca.1$x[,1]
@@ -52,7 +55,8 @@ ggplot(data.1, aes(x = PC1, y = PC2, colour = CO2.treatment, shape = species))+
   scale_shape_manual(values = c(15,16,17,18,0),
                      labels = c("Buckwheat", 
                                 "Poppy", "Sunflower"),
-                     name = "Plant species")
+                     name = "Plant species")+
+  labs(y = "PC2 (20.5%)", x = "PC1 (53.9%)")
 
 #Test whether CO2 and/or plant species were significant predictors of secondary metabolomics
 model <- manova(cbind(PC1, PC2)~CO2.treatment*species, data = data.1)
