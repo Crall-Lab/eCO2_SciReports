@@ -1,0 +1,810 @@
+rm(list=ls())
+graphics.off()
+install.packages("vegan")
+?diversity
+require(vegan)
+?diversity
+data(BCI)
+str(BCI)
+A <- colSums(BCI)
+ls()
+A
+A <- sort(A, decreasing = TRUE) # sort in rank order
+barplot(A,xlab="Rank")
+barplot(A,xlab="Rank",xaxt="n")
+A.frame <- as.data.frame(A) #
+A.frame$rank <- c(1:225)#
+attach(A.frame)#
+plot(A~rank,xlab="Rank",ylab="Abundance",type="h") #
+detach(A.frame)
+S <- specnumber(BCI)  # richness calculation in vegan package#
+S.alt <-rowSums(BCI > 0)  # more general way, ticks non-zero incidences#
+S      #print and compare#
+S.alt  #print and compare
+S <- specnumber(BCI)
+S.alt <-rowSums(BCI > 0)
+S.alt2
+S.alt
+H <- diversity(BCI)
+H
+simp
+simp <- diversity(BCI, "simpson")
+simp
+invsimp <- diversity(BCI, "inv")
+invsimp
+r.25 <- rarefy(BCI, 25)
+r.25
+alpha <- fisher.alpha(BCI)
+alpha
+J <- H/log(S)
+j
+J
+samples <- names(H)   #site labels#
+out.table <- matrix(0,nrow=length(H),ncol=6,dimnames=#
+          list(samples, c("H","simp","invsimp","r.25","alpha","J")))#
+out.table[,1] <- H   # this will assign column names - here, first column#
+out.table[,2] <- simp#
+out.table[,3] <- invsimp#
+out.table[,4] <- r.25#
+out.table[,5] <- alpha#
+out.table[,6] <- J
+pairs(cbind(H, simp, r.25, alpha, J), pch="+", col="blue")
+samples <- names(H)   #site labels
+samples
+samples <- names(H)   #site labels#
+out.table <- matrix(0,nrow=length(H),ncol=6,dimnames=#
+          list(samples, c("H","simp","invsimp","r.25","alpha","J")))#
+out.table[,1] <- H   # this will assign column names - here, first column#
+out.table[,2] <- simp#
+out.table[,3] <- invsimp#
+out.table[,4] <- r.25#
+out.table[,5] <- alpha#
+out.table[,6] <- J
+out.table
+plot(H~J)
+str(plot)
+plot
+?plot.lm
+?plot.metaMDS
+plot(x, display = c("sites", "species"), choices = c(1, 2),#
+    type = "p", shrink = FALSE,  ...)
+library("vegan")
+## ## ## ## ## #
+## January 24, 2017#
+## Olivia Bernauer#
+## Goal: Figure out whether or not my MG saw what I collected. How accurate were their observations. #
+## ## ## ## ## #
+## resources:#
+## http://environmentalcomputing.net/introduction-to-mvabund/#
+## http://eco-stats.blogspot.com/2012/03/introducing-mvabund-package-and-why.html#
+## ## ## ## ## #
+## last updated: February 7, 2017#
+#
+rm(list=ls())     ## clears environment       #
+## setwd("C:/Users/OliviaBernauer/Desktop")#
+## getwd()#
+## list.files()#
+## objects()#
+## search()#
+#
+## to run this script you need the following libraries:#
+## install.packages("mvabund")#
+library("mvabund")#
+## install.packages("reshape2")#
+library("reshape2")#
+library("plyr")#
+library("ggplot2")#
+library("vegan")#
+library("reshape")#
+library("stats")#
+## install.packages("chron")#
+library("chron")#
+library("devtools")#
+## install.packages("permute")#
+library("permute")#
+library("vegan")#
+###############################
+#
+## read in the data frames#
+data.frame<-read.csv(file="manyglm.data.csv",header=T, na.strings = c("","NULL"))#
+periods<-read.csv(file="periods.csv",header=T,na.strings=c("","NULL"))#
+o15<-read.csv(file="2015 stacked area graph data.csv",header=T,na.strings=c("","NULL"))#
+################################
+## clean up #
+#
+## Combine Genus species information, remove NA's #
+data.frame$Plant<-paste(data.frame$Genus,data.frame$species, sep = " ", collapse = NULL)#
+data.frame$Plant<-gsub("NA","",data.frame$Plant)#
+#
+## specify date as Date#
+## years#
+data.frame$Date<-as.Date(data.frame$Date,format = "%m/%d/%y")#
+o15$Date<-as.Date(o15$Date,format = "%m/%d/%y")#
+#
+## periods data frame#
+periods$Start.date<-as.Date(periods$Start.date, format = "%m/%d/%y")#
+periods$End.date<-as.Date(periods$End.date, format = "%m/%d/%y")#
+# ## Specify time#
+# table(data.frame$Observation.length)#
+# data.frame$Observation.length<-chron(times=data.frame$Observation.length, format = c(times = "h:m"))#
+# str(data.frame$Observation.length)#
+# #
+#
+## 2016#
+## specify factors#
+table(data.frame$Wind)#
+data.frame$Wind<-factor(data.frame$Wind,levels=c("Still","Light Breeze","Windy","Occasional strong gusts"))#
+table(data.frame$Sky)#
+data.frame$Sky<-factor(data.frame$Sky,levels=c("Clear","Partly cloudy","Mostly cloudy","Overcast"))#
+#
+## 2016#
+## Fill in NA values for Large and Small dark bee totals, no idea why they're missing#
+data.frame$Large.dark.bees..total[is.na(data.frame$Large.dark.bees..total)]<-0#
+data.frame$Small.dark.bees..total[is.na(data.frame$Small.dark.bees..total)]<-0#
+#
+## Whittle down the data#
+## 2016#
+t<-data.frame(table(data.frame$Site.ID.Number,useNA="ifany")); t#
+IDtokeep<-t[t$Freq>24,"Var1"]; length(IDtokeep)#
+Q<-subset(data.frame,data.frame$Site.ID.Number%in%IDtokeep)#
+## 2015#
+w<-data.frame(table(o15$Site.ID.number,useNA="ifany")); w#
+IDtokeep15<-w[w$Freq>24,"Var1"]; length(IDtokeep15)#
+W<-subset(o15,o15$Site.ID.number%in%IDtokeep15)#
+## 2016#
+## Remove extra dark bee columns #
+names(Q)#
+Q<-Q[,names(Q)[!names(Q) %in% c("LDB..with.no.Abdominal.Scopa", "SDB..with.no.Abdominal.Scopa",#
+                               "LDB..with.Abdominal.Scopa" ,"LDB...scopal.location.undetermined",#
+                               "SDB..with.Abdominal.Scopa" ,"SDB...Scopal.location.not.determined","Temperature",#
+                               "Observation.length")]]#
+## plot raw data#
+## 2016#
+Qlong<-melt(Q,id.vars=c("Data.type","Site.ID.Number","County","Date","Area.of.garden..sq.ft..","Wind","Sky","Temp","Genus","species","Cultivar","Plant.area...sq.ft","Bloom.status","Observation.period.time..am.pm.","length","Plant"              #
+))#
+table(Qlong$variable,Qlong$Site.ID.Number)#
+ggplot(Qlong,aes(x=Date,y=value,col=factor(Site.ID.Number)))+#
+      geom_point()+geom_smooth(aes(group=Site.ID.Number),se=FALSE)+#
+      facet_wrap(~variable)+labs(y='Abundance',x='Date')+theme_bw()+#
+      theme(legend.justification=c(1,0),legend.position = "bottom", legend.key = element_blank())#
+#
+table(Qlong$County,Qlong$variable,useNA = "ifany")#
+ggplot(Qlong,aes(x=Data.type,y=value + 1,col=factor(County)))+#
+  geom_jitter()+geom_smooth(aes(group=County),se=TRUE)+#
+  facet_wrap(~variable)+scale_y_log10()+labs(y='Abundance',x='Data.type')+theme_bw()+#
+  theme(legend.justification=c(1,0),legend.position = "bottom", legend.key = element_blank())#
+## 2015#
+    names(W)#
+Wlong<-melt(W,id.vars=c("Site.ID.number","Date","Period","length","Genus"))#
+table(Wlong$variable,Wlong$Site.ID.number)#
+ggplot(Wlong,aes(x=Date,y=value,col=factor(Site.ID.number)))+#
+  geom_point()+geom_smooth(aes(group=Site.ID.number),se=FALSE)+#
+  facet_wrap(~variable)+labs(y='Abundance',x='Date')+theme_bw()+#
+  theme(legend.justification=c(1,0),legend.position = "bottom", legend.key = element_blank())#
+######################################
+## model info from this website: http://edild.github.io/mvabund/#
+## accessed Jan 26, 2017#
+## These models use raw counts - advantage of modeling, no transformation of the data is needed. #
+## in the example, their treatement is going to be equivalent to our plant types#
+abu1<-Q[,c("Honey.bees","Bumble.bees","Large.carpenter.bees","Long.horned.bees","Large.dark.bees..total","Small.dark.bees..total","Green.metallic.bees","Metallic.bees..Other.metallic.bees")]#
+abu2<- manyany("manyglm",abu,abu,composition = TRUE)#
+## fitting and checking GLMs#
+abu<-Q[,c("Honey.bees","Bumble.bees","Large.carpenter.bees","Long.horned.bees","Large.dark.bees..total","Small.dark.bees..total","Green.metallic.bees","Metallic.bees..Other.metallic.bees")]#
+#
+## indicates that these are abundance columns#
+abu<-mvabund(abu)#
+#
+## * = interaction#
+# mod_pois <- manyglm(abu~ Site.ID.Number * Data.type, data=Q, family = 'poisson')#
+#
+## Is the collection method affecting the relative proprotion of bees differently on different plants.#
+## They might be different, but if it's always different in the same way it means that there is no #
+## interaction. i.e. observations are always higher = no interaction. sometimes observ>collected and #
+## collected>observ => interaction#
+mod_pois <- manyglm(abu~ Genus * Data.type, data=Q, family = 'poisson')#
+#
+plot(mod_pois)#
+#
+## Residual plot shows fan shape, trying a different model type#
+# mod_nb <- manyglm(abu~ Site.ID.Number * Data.type, data=Q, family = 'negative.binomial')#
+# mod_nb <- manyglm(abu~ Genus * Data.type, data=Q, family = 'negative.binomial')#
+mod_nb <- manyglm(abu~ Genus * Data.type, data=Q, family = 'negative.binomial', block = Site.ID.Number) ## block takes into #
+## account the fact that the same place has been sampled multiple times. When doing a mixed effect model this doens't usually #
+## change anything, however you need to do it as a safety measure. So, as of now, we've taken it into account. #
+#
+plot(mod_nb)#
+#
+## First we are looking at a normal model, ignoring the repeated measure, which is wrong.#
+## Just kidding, we don't have a multivariate mixed effect model to use yet, yay being on #
+## the edge of science. #
+## First look at interaction, want to see if there's an interaction between collection type and site#
+# mod_nb2<-manyglm(abu~ Site.ID.Number + Data.type, data=Q, family = 'negative.binomial')#
+#
+mod_nb2 <- manyglm(abu~ Genus + Data.type, data=Q, family = 'negative.binomial', block = Site.ID.Number) #
+## likelihood ratio test to compare the two models with and w/o interaction#
+mod_nb_aov<-anova(mod_nb, mod_nb2, p.uni = 'adjusted', test = 'LR')#
+#
+printCoefmat(mod_nb_aov$uni.p, na.print = '')#
+mod_nb <- manyglm(abu~ County * Data.type, data=Q, family = 'negative.binomial')#
+#
+## First look at interaction, want to see if there's an interaction between collection type and site#
+mod_nb2<-manyglm(abu~ County + Data.type, data=Q, family = 'negative.binomial')#
+#
+## likelihood ratio test to compare the two models with and w/o interaction#
+#mod_nb_aov<-anova(mod_nb, mod_nb2, p.uni = 'adjusted', test = 'LR')#
+#
+#printCoefmat(mod_nb_aov$uni.p, na.print = '')#
+## Full Model#
+#mod_nb <- manyglm(abu~ County+Site.ID.Number+Data.type+Wind+Temp+Sky+Plant, data=Q, family = 'negative.binomial')#
+#plot(mod_nb)#
+#
+## Simplified model#
+## Step one: remove Data.type - will you have different estimates of abundance according to collection type (collected or observed)#
+#mod_nb2 <- manyglm(abu~ County+Site.ID.Number+Wind+Temp+Sky+Plant, data=Q, family = 'negative.binomial')#
+#plot(mod_nb2)#
+#
+## likelihood ratio test to compare the two models with and w/o interaction#
+#mod_nb_aov<-anova(mod_nb, mod_nb2, p.uni = 'adjusted', test = 'LR')#
+#
+#printCoefmat(mod_nb_aov$uni.p, na.print = '')#
+## Hypothesis: observations do not differ between collection and observation for any site#
+########################
+## making correlation graphs#
+## Qlong - split into two - Qlong observed - need to sum up information by observation event, Qlong collected#
+Qlong.observed<-subset(Qlong,Qlong$Data.type=="Observational")#
+Qlong.specimen<-subset(Qlong,Qlong$Data.type=="Specimen")#
+#
+table(Qlong.observed$variable,Qlong.observed$Site.ID.Number)#
+table(Qlong.specimen$variable,Qlong.specimen$Site.ID.Number)#
+#
+## sum Qlong.observed, one observation per date, need to combine dates in a range#
+#
+## need to combine by date#
+## Make table w/ Period #, start date, end date#
+#
+# as.character(lapply(Qlong.observed1$Date, FUN=function(x) periods[(x>=periods$Start.date)&(x<=periods$End.date),"Period"]))#
+#table(as.character(lapply(Qlong.observed1$Date, FUN=function(x) periods[(x>=periods$Start.date)&(x<=periods$End.date),"Period"])))#
+#
+summary(Qlong.observed$value)#
+Qlong.observed1<-ddply(Qlong.observed,c("Site.ID.Number","Date","Plant","variable"),summarize,#
+                       sumvalue=sum(value),#
+                       sumtime=sum(length))#
+#
+Qlong.observed1$Period<-as.character(lapply(Qlong.observed1$Date, FUN=function(x) periods[(x>=periods$Start.date)&(x<=periods$End.date),"Period"]))#
+table(Qlong.observed1$Period)#
+#
+Qlong.observed2<-ddply(Qlong.observed1,c("Site.ID.Number","Period","Plant","variable"),summarize,#
+                       sumvalue=sum(sumvalue),#
+                       sumtime=sum(sumtime))#
+#
+Qlong.specimen$Period<-as.character(lapply(Qlong.specimen$Date, FUN=function(x) periods[(x>=periods$Start.date)&(x<=periods$End.date),"Period"]))#
+table(Qlong.specimen$Period)#
+#
+Qlong.specimen2<-ddply(Qlong.specimen,c("Site.ID.Number","Period","Plant","variable"),summarize,#
+                       sumvalue=sum(value),#
+                       sumtime=sum(length))#
+#
+## names of columns (so that they are not all the same in obs. and specimen)#
+names(Qlong.specimen2)[names(Qlong.specimen2)=="sumvalue"]<-"specimen.value"#
+names(Qlong.specimen2)[names(Qlong.specimen2)=="sumtime"]<-"specimen.time"#
+#
+names(Qlong.observed2)[names(Qlong.observed2)=="sumvalue"]<-"observed.value"#
+names(Qlong.observed2)[names(Qlong.observed2)=="sumtime"]<-"observed.time"#
+## okay now merge the data frames#
+?merge#
+M<-merge(Qlong.observed2,Qlong.specimen2,by=c("Site.ID.Number","Period","Plant","variable"),all=TRUE)#
+#
+TF<-!is.na(M$observed.value)&!is.na(M$specimen.value)#
+table(TF,useNA = "ifany")#
+#
+M1<-M[TF==TRUE,]#
+table(M1$variable)#
+table(M1$Plant)#
+#
+## standardize by time#
+M1$observed.standard<-M1$observed.value/M1$observed.time#
+M1$specimen.standard<-M1$specimen.value/M1$specimen.time#
+#
+## okay all errors fixed, finally#
+## time to plot stupid correlations for dennis#
+## finally#
+#
+ggplot(M1,aes(x=specimen.standard,y=observed.standard))+geom_point()+facet_wrap(~variable)#
+#
+## all mushed together, lots of zeros, going to transform the data#
+##remove outlier#
+M1<-M1[M1$specimen.value<100,]#
+ggplot(M1,aes(x=specimen.standard,y=observed.standard))+#
+  geom_point()+facet_wrap(~variable)+#
+  geom_smooth(method = "lm")+#
+  stat_smooth_func(geom="text",method="lm",hjust=0,parse=TRUE)#
+###################################
+## Stacked area graphs#
+#
+plants.to.plot1<-list(c("Agastache"),#
+                      c("Asclepias"),#
+                      c("Aster"),#
+                      c("Eurybia"),#
+                      c("Symphyotrichum"),#
+                      c("Echinacea"),#
+                      c("Helianthus"),#
+                      c("Monarda"),#
+                      c("Origanum"),#
+                      c("Thymus"),#
+                      c("Rudbeckia"),#
+                      c("Solidago"))#
+#
+Qlong.observed.1<-subset(Qlong.observed, Qlong.observed$Genus %in% plants.to.plot1)#
+Qlong.observed.1$Genus<-gsub("Eurybia","Aster",Qlong.observed.1$Genus)#
+Qlong.observed.1$Genus<-gsub("Symphyotrichum","Aster",Qlong.observed.1$Genus)#
+table(Qlong.observed.1$Genus)#
+## sum by date#
+N.o<-ddply(Qlong.observed.1,c("Site.ID.Number","Date","Genus","variable"),summarize,#
+                       sumvalue=sum(value),#
+                       sumtime=sum(length))#
+#
+N.o$Period<-as.character(lapply(N.o$Date, FUN=function(x) periods[(x>=periods$Start.date)&(x<=periods$End.date),"Period"]))#
+table(N.o$Period)#
+#
+##sum by Period#
+N.o2<-ddply(N.o,c("Site.ID.Number","Period","Genus","variable"),summarize,#
+                       sumvalue=sum(sumvalue),#
+                       sumtime=sum(sumtime))#
+#
+##sum by site.id.number#
+N.o3<-ddply(N.o,c("Period","Genus","variable"),summarize,#
+            sumvalue=sum(sumvalue),#
+            sumtime=sum(sumtime))#
+#
+    str(N.o3)#
+#
+## creating vbt column#
+N.o3$Vbt<-N.o3$sumvalue/N.o3$sumtime#
+    table(N.o3$Period)#
+N.o3$Period<-factor(N.o3$Period, levels = c(1:10))#
+N.o3$Period<-as.integer(as.character(N.o3$Period))#
+## plot summared area graph by plant genus, makes many#
+ggplot(N.o3, aes(x=Period, y=Vbt, fill=variable))+#
+  geom_area(colour="black", size = .2)+#
+  scale_x_continuous(breaks = c(1:10))+#
+  facet_wrap(~Genus)+#
+  scale_fill_brewer(palette="Blues")#
+#
+## summing by genus#
+N.o4<-ddply(N.o3,c("Period","variable"),summarize,#
+            sumvalue=sum(sumvalue),#
+            sumtime=sum(sumtime))#
+N.o4$Vbt<-N.o4$sumvalue/N.o4$sumtime#
+    table(N.o4$Period)#
+N.o4$Period<-factor(N.o4$Period, levels = c(1:10))#
+N.o4$Period<-as.integer(as.character(N.o4$Period))#
+#
+## plots standardized observs by time#
+ggplot(N.o4, aes(x=Period, y=Vbt, fill=variable))+#
+  geom_area(colour="black", size = .2)+#
+  scale_x_continuous(breaks = c(1:10))+#
+  scale_fill_brewer(palette="Blues")#
+## not standardized observs#
+ggplot(N.o4, aes(x=Period, y=sumvalue, fill=variable))+#
+  geom_area(colour="black", size = .2)+#
+  scale_x_continuous(breaks = c(1:10))+#
+  scale_fill_brewer(palette="Blues")#
+#
+## not standardized times of observs#
+ggplot(N.o4, aes(x=Period, y=sumtime, fill=variable))+#
+  geom_area(colour="black", size = .2)+#
+  scale_x_continuous(breaks = c(1:10))+#
+  scale_fill_brewer(palette="Blues")#
+## look at all plants#
+P<-ddply(Qlong.observed.1,c("Site.ID.Number","Date","Genus","variable"),summarize,#
+         sumvalue=sum(value),#
+         sumtime=sum(length))#
+#
+P$Period<-as.character(lapply(P$Date, FUN=function(x) periods[(x>=periods$Start.date)&(x<=periods$End.date),"Period"]))#
+table(P$Period)#
+#
+##sum by Period#
+P2<-ddply(P,c("Site.ID.Number","Period","Genus","variable"),summarize,#
+          sumvalue=sum(sumvalue),#
+          sumtime=sum(sumtime))#
+#
+##sum by site.id.number#
+P3<-ddply(P,c("Period","Genus","variable"),summarize,#
+          sumvalue=sum(sumvalue),#
+          sumtime=sum(sumtime))#
+#
+## sum by genus#
+P4<-ddply(P3,c("Period","variable"),summarize,#
+            sumvalue=sum(sumvalue),#
+            sumtime=sum(sumtime))#
+## creating vbt column#
+P4$Vbt<-P4$sumvalue/P4$sumtime#
+    table(P4$Period)#
+P4$Period<-factor(P4$Period, levels = c(1:10))#
+P4$Period<-as.integer(as.character(P4$Period))#
+## plot summared area graph by plant genus, makes many#
+ggplot(P4, aes(x=Period, y=Vbt, fill=variable))+#
+  geom_area(aes(colour=variable, fill=variable))+#
+  scale_x_continuous(breaks = c(1:10))#
+## not standardized observs#
+ggplot(P4, aes(x=Period, y=sumvalue, fill=variable))+#
+  geom_area(aes(colour=variable, fill=variable))+#
+  scale_x_continuous(breaks = c(1:10))#
+#
+## not standardized times of observs#
+ggplot(P4, aes(x=Period, y=sumtime, fill=variable))+#
+  geom_area(aes(colour=variable, fill=variable))+#
+  scale_x_continuous(breaks = c(1:10))#
+## Need to do the same thing for the specimens and for 2015 data#
+## specimens#
+plants.to.plot1<-list(c("Agastache"),#
+                      c("Asclepias"),#
+                      c("Aster"),#
+                      c("Eurybia"),#
+                      c("Symphyotrichum"),#
+                      c("Echinacea"),#
+                      c("Helianthus"),#
+                      c("Monarda"),#
+                      c("Origanum"),#
+                      c("Thymus"),#
+                      c("Rudbeckia"),#
+                      c("Solidago"))#
+#
+Qlong.specimen.1<-subset(Qlong.specimen, Qlong.specimen$Genus %in% plants.to.plot1)#
+Qlong.specimen.1$Genus<-gsub("Eurybia","Aster",Qlong.specimen.1$Genus)#
+Qlong.specimen.1$Genus<-gsub("Symphyotrichum","Aster",Qlong.specimen.1$Genus)#
+table(Qlong.specimen.1$Genus)#
+## sum by date#
+S<-ddply(Qlong.specimen.1,c("Site.ID.Number","Date","Genus","variable"),summarize,#
+         sumvalue=sum(value),#
+         sumtime=sum(length))#
+#
+S$Period<-as.character(lapply(S$Date, FUN=function(x) periods[(x>=periods$Start.date)&(x<=periods$End.date),"Period"]))#
+table(S$Period)#
+#
+##sum by Period#
+S2<-ddply(S,c("Site.ID.Number","Period","Genus","variable"),summarize,#
+          sumvalue=sum(sumvalue),#
+          sumtime=sum(sumtime))#
+#
+##sum by site.id.number#
+S3<-ddply(S,c("Period","Genus","variable"),summarize,#
+          sumvalue=sum(sumvalue),#
+          sumtime=sum(sumtime))#
+#
+str(S3)#
+#
+## creating vbt column#
+S3$Vbt<-S3$sumvalue/S3$sumtime#
+table(S3$Period)#
+S3$Period<-factor(S3$Period, levels = c(1:10))#
+S3$Period<-as.integer(as.character(S3$Period))#
+## plot summared area graph by plant genus, makes many#
+ggplot(S3, aes(x=Period, y=Vbt, fill=variable))+#
+  geom_area(colour="black", size = .2)+#
+  scale_x_continuous(breaks = c(1:10))+#
+  facet_wrap(~Genus)+#
+  scale_fill_brewer(palette="Blues")#
+#
+## summingi by genus#
+S4<-ddply(S3,c("Period","variable"),summarize,#
+          sumvalue=sum(sumvalue),#
+          sumtime=sum(sumtime))#
+S4$Vbt<-S4$sumvalue/S4$sumtime#
+table(S4$Period)#
+S4$Period<-factor(S4$Period, levels = c(1:10))#
+S4$Period<-as.integer(as.character(S4$Period))#
+#
+## plots standardized observs by time#
+ggplot(S4, aes(x=Period, y=Vbt, fill=variable))+#
+  geom_area(colour="black", size = .2)+#
+  scale_x_continuous(breaks = c(1:10))+#
+  scale_fill_brewer(palette="Blues")#
+## not standardized observs#
+ggplot(S4, aes(x=Period, y=sumvalue, fill=variable))+#
+  geom_area(colour="black", size = .2)+#
+  scale_x_continuous(breaks = c(1:10))+#
+  scale_fill_brewer(palette="Blues")#
+#
+## not standardized times of observs#
+ggplot(S4, aes(x=Period, y=sumtime, fill=variable))+#
+  geom_area(colour="black", size = .2)+#
+  scale_x_continuous(breaks = c(1:10))+#
+  scale_fill_brewer(palette="Blues")#
+## look at all plants#
+R<-ddply(Qlong.specimen.1,c("Site.ID.Number","Date","Genus","variable"),summarize,#
+         sumvalue=sum(value),#
+         sumtime=sum(length))#
+#
+R$Period<-as.character(lapply(R$Date, FUN=function(x) periods[(x>=periods$Start.date)&(x<=periods$End.date),"Period"]))#
+table(R$Period)#
+#
+##sum by Period#
+R2<-ddply(R,c("Site.ID.Number","Period","Genus","variable"),summarize,#
+          sumvalue=sum(sumvalue),#
+          sumtime=sum(sumtime))#
+#
+##sum by site.id.number#
+R3<-ddply(R,c("Period","Genus","variable"),summarize,#
+          sumvalue=sum(sumvalue),#
+          sumtime=sum(sumtime))#
+#
+## sum by genus#
+R4<-ddply(R3,c("Period","variable"),summarize,#
+          sumvalue=sum(sumvalue),#
+          sumtime=sum(sumtime))#
+## creating vbt column#
+R4$Vbt<-R4$sumvalue/R4$sumtime#
+table(R4$Period)#
+R4$Period<-factor(R4$Period, levels = c(1:10))#
+R4$Period<-as.integer(as.character(R4$Period))#
+#
+## same trends seen when looking at standard list of plants compared to all plants#
+## plot summared area graph by plant genus, makes many#
+ggplot(R4, aes(x=Period, y=Vbt, fill=variable))+#
+  geom_area(aes(colour=variable, fill=variable))+#
+  scale_x_continuous(breaks = c(1:10))#
+## not standardized observs#
+ggplot(R4, aes(x=Period, y=sumvalue, fill=variable))+#
+  geom_area(aes(colour=variable, fill=variable))+#
+  scale_x_continuous(breaks = c(1:10))#
+#
+## not standardized times of observs#
+ggplot(R4, aes(x=Period, y=sumtime, fill=variable))+#
+  geom_area(aes(colour=variable, fill=variable))+#
+  scale_x_continuous(breaks = c(1:10))#
+## 2015#
+## I don't have actual time interval for observation periods, so we are going to assume that everyone observed for #
+## 10 minutes per flowering plant like they were supposed to#
+Wlong1<-subset(Wlong, Wlong$Genus %in% plants.to.plot1)#
+Wlong1$Genus<-gsub("Eurybia","Aster",Wlong1$Genus)#
+Wlong1$Genus<-gsub("Symphyotrichum","Aster",Wlong1$Genus)#
+table(Wlong1$Genus)#
+str(Y)#
+## sum by date#
+Y<-ddply(Wlong1,c("Site.ID.number","Date","Genus","variable","Period"),summarize,#
+         sumvalue=sum(value),#
+         sumtime=sum(length))#
+##sum by Period#
+Y2<-ddply(Y,c("Site.ID.number","Period","Genus","variable"),summarize,#
+          sumvalue=sum(sumvalue),#
+          sumtime=sum(sumtime))#
+#
+##sum by site.id.number#
+Y3<-ddply(Y,c("Period","Genus","variable"),summarize,#
+          sumvalue=sum(sumvalue),#
+          sumtime=sum(sumtime))#
+#
+str(Y3)#
+#
+## creating vbt column#
+Y3$Vbt<-Y3$sumvalue/Y3$sumtime#
+table(Y3$Period)#
+Y3$Period<-factor(Y3$Period, levels = c(1:10))#
+Y3$Period<-as.integer(as.character(Y3$Period))#
+## plot summared area graph by plant genus, makes many#
+ggplot(Y3, aes(x=Period, y=Vbt, fill=variable))+#
+  geom_area(colour="black", size = .2)+#
+  scale_x_continuous(breaks = c(1:10))+#
+  facet_wrap(~Genus)+#
+  scale_fill_brewer(palette="Blues")#
+#
+## summingi by genus#
+Y4<-ddply(Y3,c("Period","variable"),summarize,#
+          sumvalue=sum(sumvalue),#
+          sumtime=sum(sumtime))#
+Y4$Vbt<-Y4$sumvalue/Y4$sumtime#
+table(Y4$Period)#
+Y4$Period<-factor(Y4$Period, levels = c(1:10))#
+Y4$Period<-as.integer(as.character(Y4$Period))#
+#
+## plots standardized observs by time#
+ggplot(Y4, aes(x=Period, y=Vbt, fill=variable))+#
+  geom_area(colour="black", size = .2)+#
+  scale_x_continuous(breaks = c(1:10))+#
+  scale_fill_brewer(palette="Blues")#
+## not standardized observs#
+ggplot(Y4, aes(x=Period, y=sumvalue, fill=variable))+#
+  geom_area(colour="black", size = .2)+#
+  scale_x_continuous(breaks = c(1:10))+#
+  scale_fill_brewer(palette="Blues")#
+#
+## not standardized times of observs#
+ggplot(Y4, aes(x=Period, y=sumtime, fill=variable))+#
+  geom_area(colour="black", size = .2)+#
+  scale_x_continuous(breaks = c(1:10))+#
+  scale_fill_brewer(palette="Blues")#
+## look at all plants#
+Z<-ddply(Wlong1,c("Site.ID.number","Date","Genus","variable","Period"),summarize,#
+         sumvalue=sum(value),#
+         sumtime=sum(length))#
+##sum by Period#
+Z2<-ddply(Z,c("Site.ID.number","Period","Genus","variable"),summarize,#
+          sumvalue=sum(sumvalue),#
+          sumtime=sum(sumtime))#
+#
+##sum by site.id.number#
+Z3<-ddply(Z,c("Period","Genus","variable"),summarize,#
+          sumvalue=sum(sumvalue),#
+          sumtime=sum(sumtime))#
+#
+## sum by genus#
+Z4<-ddply(Z3,c("Period","variable"),summarize,#
+          sumvalue=sum(sumvalue),#
+          sumtime=sum(sumtime))#
+## creating vbt column#
+Z4$Vbt<-Z4$sumvalue/Z4$sumtime#
+table(Z4$Period)#
+Z4$Period<-factor(Z4$Period, levels = c(1:10))#
+Z4$Period<-as.integer(as.character(Z4$Period))#
+#
+## same trends seen when looking at standard list of plants compared to all plants#
+## plot summared area graph by plant genus, makes many#
+ggplot(Z4, aes(x=Period, y=Vbt, fill=variable))+#
+  geom_area(aes(colour=variable, fill=variable))+#
+  scale_x_continuous(breaks = c(1:10))#
+## not standardized observs#
+ggplot(Z4, aes(x=Period, y=sumvalue, fill=variable))+#
+  geom_area(aes(colour=variable, fill=variable))+#
+  scale_x_continuous(breaks = c(1:10))#
+#
+## not standardized times of observs#
+ggplot(Z4, aes(x=Period, y=sumtime, fill=variable))+#
+  geom_area(aes(colour=variable, fill=variable))+#
+  scale_x_continuous(breaks = c(1:10))#
+#########################################
+## NMDS plots#
+#
+B<-subset(Q,Q$County=="Baltimore")#
+#
+B1<-B[,names(B)[!names(Q) %in% c("Site.ID.Number","County","Date","Area.of.garden..sq.ft..","Wind","Sky","Temp","Genus","species","Cultivar","Plant.area...sq.ft",              #
+                                 "Bloom.status","Observation.period.time..am.pm.","length","Plant" )]]#
+#
+B1$Data.type<-gsub("Observational","1",B1$Data.type)#
+B1$Data.type<-gsub("Specimen","2",B1$Data.type)#
+#
+B1<-as.matrix(B1)#
+#
+S<-simper(B1,"Data.type")#
+summary(S)#
+#
+S<-apply(B[,2:9],2,function(y)tapply(y,Q$Data.type,function(x) sum(x,na.rm=TRUE))) ##2 means same this for each column#
+S<-as.matrix(S)#
+is.matrix(PollNetwork)#
+#
+?gsub#
+#
+sd$ID<-gsub("USGS_DRO","",sd$ID)#
+####################################
+## found at https://gist.github.com/kdauria/524eade46135f6348140#
+## accessed on Jan 26, 2017#
+#
+stat_smooth_func <- function(mapping = NULL, data = NULL,#
+                             geom = "smooth", position = "identity",#
+                             ...,#
+                             method = "auto",#
+                             formula = y ~ x,#
+                             se = TRUE,#
+                             n = 80,#
+                             span = 0.75,#
+                             fullrange = FALSE,#
+                             level = 0.95,#
+                             method.args = list(),#
+                             na.rm = FALSE,#
+                             show.legend = NA,#
+                             inherit.aes = TRUE,#
+                             xpos = NULL,#
+                             ypos = NULL) {#
+  layer(#
+    data = data,#
+    mapping = mapping,#
+    stat = StatSmoothFunc,#
+    geom = geom,#
+    position = position,#
+    show.legend = show.legend,#
+    inherit.aes = inherit.aes,#
+    params = list(#
+      method = method,#
+      formula = formula,#
+      se = se,#
+      n = n,#
+      fullrange = fullrange,#
+      level = level,#
+      na.rm = na.rm,#
+      method.args = method.args,#
+      span = span,#
+      xpos = xpos,#
+      ypos = ypos,#
+      ...#
+    )#
+  )#
+}#
+StatSmoothFunc <- ggproto("StatSmooth", Stat,#
+                          setup_params = function(data, params) {#
+                            # Figure out what type of smoothing to do: loess for small datasets,#
+                            # gam with a cubic regression basis for large data#
+                            # This is based on the size of the _largest_ group.#
+                            if (identical(params$method, "auto")) {#
+                              max_group <- max(table(data$group))#
+                              if (max_group < 1000) {#
+                                params$method <- "loess"#
+                              } else {#
+                                params$method <- "gam"#
+                                params$formula <- y ~ s(x, bs = "cs")#
+                              }#
+                            }#
+                            if (identical(params$method, "gam")) {#
+                              params$method <- mgcv::gam#
+                            }#
+                            params#
+                          },#
+                          compute_group = function(data, scales, method = "auto", formula = y~x,#
+                                                   se = TRUE, n = 80, span = 0.75, fullrange = FALSE,#
+                                                   xseq = NULL, level = 0.95, method.args = list(),#
+                                                   na.rm = FALSE, xpos=NULL, ypos=NULL) {#
+                            if (length(unique(data$x)) < 2) {#
+                              # Not enough data to perform fit#
+                              return(data.frame())#
+                            }#
+                            if (is.null(data$weight)) data$weight <- 1#
+                            if (is.null(xseq)) {#
+                              if (is.integer(data$x)) {#
+                                if (fullrange) {#
+                                  xseq <- scales$x$dimension()#
+                                } else {#
+                                  xseq <- sort(unique(data$x))#
+                                }#
+                              } else {#
+                                if (fullrange) {#
+                                  range <- scales$x$dimension()#
+                                } else {#
+                                  range <- range(data$x, na.rm = TRUE)#
+                                }#
+                                xseq <- seq(range[1], range[2], length.out = n)#
+                              }#
+                            }#
+                            # Special case span because it's the most commonly used model argument#
+                            if (identical(method, "loess")) {#
+                              method.args$span <- span#
+                            }#
+                            if (is.character(method)) method <- match.fun(method)#
+                            base.args <- list(quote(formula), data = quote(data), weights = quote(weight))#
+                            model <- do.call(method, c(base.args, method.args))#
+                            m = model#
+                            eq <- substitute(italic(y) == a + b %.% italic(x)*","~~italic(r)^2~"="~r2, #
+                                             list(a = format(coef(m)[1], digits = 3), #
+                                                  b = format(coef(m)[2], digits = 3), #
+                                                  r2 = format(summary(m)$r.squared, digits = 3)))#
+                            func_string = as.character(as.expression(eq))#
+                            if(is.null(xpos)) xpos = min(data$x)*0.9#
+                            if(is.null(ypos)) ypos = max(data$y)*0.9#
+                            data.frame(x=xpos, y=ypos, label=func_string)#
+                          },#
+                          required_aes = c("x", "y")#
+)
+rm(list=ls())     ## clears environment
+getwd()
+setwd("C:/Users/OliviaBernauer/Desktop")
+rm(list=ls())
+setwd("C:/Users/OliviaBernauer/Desktop")
+getwd()
+setwd("C:/Users/OliviaBernauer/Desktop")
+rm(list=ls())
+setwd("C:/Users/OliviaBernauer/Desktop")
+q()
+yes
+y
+library("dplyr")
+install.packages("dplyr")
+getwd()
+:# August 3, 2022#
+# Goal: learning R#
+#
+getwd()
+library(ggplot2)library(tidyverse)
+setwd("/Users/OliviaBernauer/Documents/Research/oliviabernauer/eCO2_SciReports")
+data <- read.csv('Pollen_metabolomics_exp1.csv')data[data == "N/F"] <- NaNdata.1 <- data %>% filter(Round == "1")data.2 <- data %>% filter(Round == "2")
+data.1 <- data.1 %>% filter(species != "squash")# also remove tomato for small sample sizesdata.1 <- data.1 %>% filter(species != "tomato")#Separate out amino acids cls <- c(6, 12, 13, 15, 16, 19, 21, 22, 23)#Convert columns to numericfor(i in 1:length(cls)){#
+  data.1[,cls[i]] <- as.numeric(data.1[,cls[i]])}#Run principal components analysispc.data.1 <- data.1[,cls]ind <- complete.cases(pc.data.1)pc.data.1 <- pc.data.1[ind,]pca.1 <- prcomp(pc.data.1, scale= TRUE)summary(pca.1)
+#Write PCs back to original data framedata.1$PC1[ind] <- pca.1$x[,1]data.1$PC2[ind] <- pca.1$x[,2]#Generate figure and write to current working directorydata$CO2.treatment <- as.factor(data$CO2.treatment)data$species <- as.factor(data$species)
+ggplot(data.1, aes(x = PC1, y = PC2, colour = CO2.treatment, shape = species))+  geom_point()+  stat_ellipse()+  theme_classic()+  scale_color_manual(values = c("#becbca","#69a1ff"),                      labels = c("aCO2", "eCO2"),                     name = "Treatment")+  scale_shape_manual(values = c(15,16,17, 18, 0),                     labels = c("Buckwheat",                                 "Poppy", "Sunflower"),                     name = "Plant species")+  labs(y = "PC2 (20.5%)", x = "PC1 (53.8%)")
