@@ -170,7 +170,7 @@ eug$Eugenol <- as.numeric(eug$Eugenol)
 # analyze data and test fit 
 m.eug <- lm(Eugenol~CO2.treatment*species, data = eug) # not enough data from both rounds to include in model
 plot(simulationOutput <- simulateResiduals(fittedModel = m.eug, plot = F))
-anova(m.eug) # round and species, co2 x species significant
+anova(m.eug) # nothing significant
 
 # gallic acid
 # filter out gallic acid samples, and then only keep samples with 3+ per plant, co2 treatment, and round
@@ -180,7 +180,7 @@ gal$Gallic.acid <- as.numeric(gal$Gallic.acid)
 # analyze data and test fit 
 m.gal <- lm(Gallic.acid~CO2.treatment*species + Round, data = gal) 
 plot(simulationOutput <- simulateResiduals(fittedModel = m.gal, plot = F))
-anova(m.gal) # round and species, co2 x species significant
+anova(m.gal) # round and species significant
 
 # kaempferol
 # filter out kaempferol samples, and then only keep samples with 3+ per plant, co2 treatment, and round
@@ -210,8 +210,8 @@ m.pc.a <- lm(log(P.coumaric.acid)~CO2.treatment*species + Round, data = pc.a)
 plot(simulationOutput <- simulateResiduals(fittedModel = m.pc.a, plot = F))
 anova(m.pc.a) # round and species
 
-# quercitin
-# filter out quercitin samples, and then only keep samples with 3+ per plant, co2 treatment, and round
+# quercetin
+# filter out quercetin samples, and then only keep samples with 3+ per plant, co2 treatment, and round
 que <- data %>% filter(Quercitin != "NaN")
 que <- que %>% group_by(species, Round, CO2.treatment) %>% filter(n()>2) %>% ungroup()
 que$Quercitin <- as.numeric(que$Quercitin)
