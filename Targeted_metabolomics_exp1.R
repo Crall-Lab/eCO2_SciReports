@@ -67,6 +67,21 @@ model <- manova(cbind(PC1, PC2)~CO2.treatment*species, data = data.1)
 summary(model)
 # both CO2 and species were significant predictors of secondary chemistry but no interaction between the two
 
+# explore each species separately
+# buckwheat
+d1.bw <- data.1 %>% filter(species == "buckwheat")
+model.bw <- manova(cbind(PC1, PC2)~CO2.treatment, data = d1.bw)
+summary(model.bw) # not significant
+# poppy
+d1.p <- data.1 %>% filter(species == "poppy")
+model.p <- manova(cbind(PC1, PC2)~CO2.treatment, data = d1.p)
+summary(model.p) # not significant
+
+# sunflower
+d1.sf <- data.1 %>% filter(species == "sunflower")
+model.sf <- manova(cbind(PC1, PC2)~CO2.treatment, data = d1.sf)
+summary(model.sf) # not significant
+
 ## Round 2 
 #Get list of columns with reasonable data representation across species
 cls <- c(6, 12, 13, 15, 16, 19, 21, 22, 23)
