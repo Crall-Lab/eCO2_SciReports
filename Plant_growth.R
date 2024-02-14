@@ -442,19 +442,6 @@ m.BW2 <- glmer.nb(Flower_no ~ CO2 + Round + (1|week) + (1|Chamber),
 plot(simulationOutput <- simulateResiduals(fittedModel=m.BW2, plot =F))
 car::Anova(m.BW2) # report this
 
-# Make predictions using fixed effect only and then random effects and plot the results
-#pred.f.BW <- f.BW %>% 
-#  mutate(pred_fixef = predict(m.BW2, type = "response", re.form = NA))
-#
-#pred.f.BW$pred_fixef_ln <- exp(pred.f.BW$pred_fixef)
-
-#pred.f.BW.sum <- pred.f.BW %>% group_by(CO2, week) %>%
-#  dplyr::summarise(
-#    count = n(),
-#    mean = mean(pred_fixef_ln, na.rm = T),
-#    sd = sd(pred_fixef_ln, na.rm = T)
-#  )
-#pred.f.BW.sum$se <- pred.f.BW.sum$sd/sqrt(pred.f.BW.sum$count)
 
 ## Clover
 f.C <- flowers %>% filter(Plant == "C")
@@ -463,10 +450,6 @@ m.C2 <- glmer.nb(Flower_no ~ CO2 + Round + (1|week) + (1|Chamber),
                  data = f.C)
 plot(simulationOutput <- simulateResiduals(fittedModel=m.C2, plot =F))
 car::Anova(m.C2) # report this
-
-#newdata1 <- data.frame(datenum = 70, CO2 = factor(0:1, levels = 0:1), Round = factor(1:2, levels = 1:2))
-#newdata1$phat <- predict(m.C2, newdata1, type = "response", re.form = NA)
-#newdata1
 
 ## Lacy Phacelia
 f.LP <- flowers %>% filter(Plant == "LP")
