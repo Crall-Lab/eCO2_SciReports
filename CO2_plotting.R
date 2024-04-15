@@ -13,17 +13,17 @@ r1 <- subset(C1, datenum > 6000 & datenum < 8000)
 r2 <- subset(C1, datenum > 9500 & datenum < 11000)
 
 par(mfcol = c(1,2))
-boxplot(as.numeric(r1$co2_a), as.numeric(r1$co2_e), 
+boxplot(as.numeric(r1$co2_1), as.numeric(r1$co2_2), 
         outline = FALSE, col= c('#becbca', '#69a1ff'), 
-        axes=FALSE, xlab="", ylab = "CO2 (ppm)", ylim = c(350,700))
+        axes=FALSE, xlab="", ylab = "CO2 (ppm)", ylim = c(350,800))
 axis(1, labels = c('ambient', 'elevated'), at = c(1,2))
 axis(2)
 title('Round 1')
 
-boxplot(as.numeric(r2$co2_a), as.numeric(r2$co2_e), 
-        outline = FALSE, col= c('#69a1ff', '#becbca'), 
-        axes=FALSE, ann = FALSE, ylim = c(350,700))
-axis(1, labels = c('elevated', 'ambient'), at = c(1,2))
+boxplot(as.numeric(r2$co2_2), as.numeric(r2$co2_1), 
+        outline = FALSE, col= c('#becbca', '#69a1ff'), 
+        axes=FALSE, ann = FALSE, ylim = c(350,800))
+axis(1, labels = c('ambient', 'elevated'), at = c(1,2))
 title('Round 2')
 
 dev.off()
@@ -49,11 +49,11 @@ axis(1, labels = c('ambient', 'elevated'), at = c(1,2))
 axis(2)
 title('Round 1')
 
-boxplot(as.numeric(r2$eco2), as.numeric(r2$aco2), 
-        outline = FALSE, col= c('#69a1ff', '#becbca'), 
+boxplot(as.numeric(r2$aco2), as.numeric(r2$eco2), 
+        outline = FALSE, col= c('#becbca', '#69a1ff'), 
         axes=FALSE, ann = FALSE, 
         ylim = c(300,800))
-axis(1, labels = c('elevated', 'ambient'), at = c(1,2))
+axis(1, labels = c('ambient', 'elevated'), at = c(1,2))
 title('Round 2')
 
 dev.off()
