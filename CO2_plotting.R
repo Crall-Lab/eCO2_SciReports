@@ -15,14 +15,14 @@ r2 <- subset(C1, datenum > 9500 & datenum < 11000)
 par(mfcol = c(1,2))
 boxplot(as.numeric(r1$co2_1), as.numeric(r1$co2_2), 
         outline = FALSE, col= c('#becbca', '#69a1ff'), 
-        axes=FALSE, xlab="", ylab = "CO2 (ppm)", ylim = c(350,800))
+        axes=FALSE, xlab="", ylab = "CO2 (ppm)", ylim = c(300,800))
 axis(1, labels = c('ambient', 'elevated'), at = c(1,2))
 axis(2)
 title('Round 1')
 
 boxplot(as.numeric(r2$co2_2), as.numeric(r2$co2_1), 
         outline = FALSE, col= c('#becbca', '#69a1ff'), 
-        axes=FALSE, ann = FALSE, ylim = c(350,800))
+        axes=FALSE, ann = FALSE, ylim = c(300,800))
 axis(1, labels = c('ambient', 'elevated'), at = c(1,2))
 title('Round 2')
 
