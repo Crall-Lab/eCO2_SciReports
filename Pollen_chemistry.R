@@ -8,6 +8,8 @@ library("ggpubr")
 library("lme4")
 library("DHARMa")
 library("lmerTest")
+library("emmeans")
+library("multcomp")
 
 ##############################
 ## read in the data frames
@@ -115,23 +117,39 @@ ggarrange(N, C, CN, nrow=3, ncol = 1)
 ### analysis
 # N model
 W.po.short1 <- W.po.short %>% filter(!is.na(N))
-m.N <- lmer(N ~ CO2*Plant_SP + Round + (1|Chamber), data = W.po.short, REML=F)
+m.N <- lm(log(N) ~ CO2*Plant_SP + Round + Chamber, data = W.po.short)
 plot(simulationOutput <- simulateResiduals(fittedModel = m.N, plot = F))
 summary(m.N)
 anova(m.N) # plant sp, round significant
 
+emm_model1 <- emmeans(m.N, pairwise ~ CO2|Plant_SP)
+groups_emm_model1 <-cld(emm_model1, level = 0.05)
+summary(groups_emm_model1)
+pairs(emm_model1) 
+
+
 ## C:N ratio
-m.CN <- lmer(ratio ~ CO2*Plant_SP + Round + (1|Chamber), data = W.po.short, REML=F)
+m.CN <- lm(log(ratio) ~ CO2*Plant_SP + Round + Chamber, data = W.po.short)
 plot(simulationOutput <- simulateResiduals(fittedModel = m.CN, plot = F))
 summary(m.CN)
 anova(m.CN) # plant species, co2 x plant species significant 
 
+emm_model1 <- emmeans(m.CN, pairwise ~ CO2|Plant_SP)
+groups_emm_model1 <-cld(emm_model1, level = 0.05)
+summary(groups_emm_model1)
+pairs(emm_model1)
+
 ####
 # %C
-m.C <- lmer(C ~ CO2*Plant_SP + Round + (1|Chamber), data = W.po.short, REML=F)
+m.C <- lm(C ~ CO2*Plant_SP + Round + Chamber, data = W.po.short)
 plot(simulationOutput <- simulateResiduals(fittedModel = m.C, plot = F))
 summary(m.C)
 anova(m.C) # significant effect of Round and Plant species
+
+emm_model1 <- emmeans(m.C, pairwise ~ CO2|Plant_SP)
+groups_emm_model1 <-cld(emm_model1, level = 0.05)
+summary(groups_emm_model1)
+pairs(emm_model1)
 
 # compare each plant species independently
 
@@ -367,7 +385,7 @@ C<- ggplot(H.short, aes(x= Plant, y = C, fill = CO2))+
   scale_color_manual(values = c("black", "navy"),
                      labels = c("aCO2", "eCO2"),
                      name = "CO2 Treatment")+
-  scale_x_discrete(labels = plants)+
+  scale_x_discrete(labels = plants.1)+
   theme(legend.position = "none",
         axis.text.x = element_text(angle = 90, hjust=1, size = .2),
         axis.title.x=element_blank())+
@@ -388,7 +406,7 @@ CN<-ggplot(H.short, aes(x= Plant, y = ratio, fill = CO2))+
   scale_color_manual(values = c("black", "navy"),
                      labels = c("aCO2", "eCO2"),
                      name = "CO2 Treatment")+
-  scale_x_discrete(labels = plants)+
+  scale_x_discrete(labels = plants.1)+
   stat_summary(fun = "mean",
                fun.args = list(mult = 1),
                geom="crossbar", 
@@ -408,17 +426,32 @@ plot(simulationOutput <- simulateResiduals(fittedModel=m.N, plot =F))
 summary(m.N)
 anova(m.N)
 
+emm_model1 <- emmeans(m.N, pairwise ~ CO2|Plant)
+groups_emm_model1 <-cld(emm_model1, level = 0.05)
+summary(groups_emm_model1)
+pairs(emm_model1)
+
 # C:N ratio
 m.CN <- lm(ratio ~ CO2*Plant + Round, data = H.short)
 plot(simulationOutput <- simulateResiduals(fittedModel=m.CN, plot =F))
 summary(m.CN)
 anova(m.CN)
 
+emm_model1 <- emmeans(m.CN, pairwise ~ CO2|Plant)
+groups_emm_model1 <-cld(emm_model1, level = 0.05)
+summary(groups_emm_model1)
+pairs(emm_model1)
+
 # %C
 m.C <- lm(C ~ CO2*Plant + Round, data = H.short)
 plot(simulationOutput <- simulateResiduals(fittedModel=m.C, plot =F))
 summary(m.C)
 anova(m.C)
+
+emm_model1 <- emmeans(m.C, pairwise ~ CO2|Plant)
+groups_emm_model1 <-cld(emm_model1, level = 0.05)
+summary(groups_emm_model1)
+pairs(emm_model1)
 
 # compare each plant species separately 
 ## Melon - only R1 
