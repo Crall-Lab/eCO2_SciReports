@@ -790,10 +790,15 @@ theme(legend.position = "none",
 # compare all plant species together
 BM$Chamber <- as.factor(BM$Chamber)
 BM <- BM %>% filter(Plant.biomass != 0)
-m.B <- lmer(log(Plant.biomass) ~ CO2*Plant+(1|Chamber), data = BM, REML = F)
+m.B <- lm(log(Plant.biomass) ~ CO2*Plant+Chamber, data = BM)
 plot(simulationOutput <- simulateResiduals(fittedModel = m.B, plot = F))
 summary(m.B)
 anova(m.B)
+
+emm_model1 <- emmeans(m.B, pairwise ~ CO2|Plant)
+groups_emm_model1 <-cld(emm_model1, level = 0.05)
+summary(groups_emm_model1)
+pairs(emm_model1)
 
 # compare each plant species independently with t-tests
 # Borage
