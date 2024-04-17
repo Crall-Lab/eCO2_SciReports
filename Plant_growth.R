@@ -17,6 +17,8 @@ library("scales")
 library("see")
 library("DHARMa")
 library("GLMMadaptive")
+library("emmeans")
+library("multcomp")
 
 ##############################
 ## read in all of the data frames you need
@@ -103,15 +105,14 @@ ggplot(height, aes(x=datenum, y = Height_cm, color = CO2))+
 height$week <- height$datenum/7
 
 # full model
-m.1 <- lmer(Height_cm ~ CO2*Plant + Round + week + (1|Chamber), data = height, REML=F)
+m.1 <- lm(log(Height_cm) ~ CO2*Plant + Round + week + Chamber, data = height)
 plot(simulationOutput <- simulateResiduals(fittedModel=m.1, plot =F))
-summary(m.1)
-anova(m.1)
-# try ln-transforming data to improve normality
-m.2 <- lmer(log(Height_cm) ~ CO2*Plant + Round + week + (1|Chamber), data = height, REML=F)
-plot(simulationOutput <- simulateResiduals(fittedModel=m.2, plot =F))
-anova(m.1, m.2)  
-anova(m.2) 
+anova(m.1) 
+
+emm_model1 <- emmeans(m.1, pairwise ~ CO2|Plant)
+groups_emm_model1 <-cld(emm_model1, level = 0.05)
+summary(groups_emm_model1)
+pairs(emm_model1)
 
 # compare each individual plant species separately
 ## Borage
@@ -258,13 +259,14 @@ ggplot(leaves, aes(x=datenum, y = Leaf_no, color = CO2))+
 leaves$week <- leaves$datenum/7
 
 # full model looking at leaf number, week, plant species, and CO2 treament 
-m.B1 <- lmer(Leaf_no ~ CO2*Plant + Round + week + (1|Chamber), data = leaves, REML=F)
-plot(simulationOutput <- simulateResiduals(fittedModel=m.B1, plot =F))
-# see if ln-transformation is a better fit
-m.B1.log <- lmer(log(Leaf_no) ~ CO2*Plant + Round + week + (1|Chamber), data = leaves, REML=F)
+m.B1.log <- lm(log(Leaf_no) ~ CO2*Plant + Round + week + Chamber, data = leaves)
 plot(simulationOutput <- simulateResiduals(fittedModel=m.B1.log, plot =F))
-anova(m.B1, m.B1.log) 
 anova(m.B1.log) # CO2 not significant, but Plant species and Co2 x Plant species, so compare each species alone
+
+emm_model1 <- emmeans(m.B1.log, pairwise ~ CO2|Plant)
+groups_emm_model1 <-cld(emm_model1, level = 0.05)
+summary(groups_emm_model1)
+pairs(emm_model1)
 
 ## Borage
 l.B <- leaves %>% filter(Plant == "B")
@@ -420,10 +422,15 @@ ggplot(flowers, aes(x=week, y = Flower_no, color = CO2))+
 flowers$week <- round(flowers$week, digits = 0)
 
 # full model w/all plant species
-m.3 <- glmer.nb(Flower_no ~ CO2*Plant+Round+ (1|Chamber) + (1|week),
+m.3 <- glmer.nb(Flower_no ~ CO2*Plant+Round+Chamber + (1|week),
                  data = flowers)
 plot(simulationOutput <- simulateResiduals(fittedModel=m.3, plot =F))
 car::Anova(m.3) # report this
+
+emm_model1 <- emmeans(m.3, pairwise ~ CO2|Plant)
+groups_emm_model1 <-cld(emm_model1, level = 0.05)
+summary(groups_emm_model1)
+pairs(emm_model1)
 
 # compare each plant species separately 
 ## Borage
@@ -530,13 +537,16 @@ ggplot(ff, aes(x=Plant, y = log10(datenum), fill = CO2))+
   labs(y = "log(Days since planting)")
 
 ## Compare all plant species together
-m.4 <- lmer(datenum ~ CO2*Plant+Round + (1|Chamber), data = ff, REML=F)
-plot(simulationOutput <- simulateResiduals(fittedModel = m.4, plot = F))
-m.4.log <- lmer(log(datenum) ~ CO2*Plant+Round + (1|Chamber), data = ff, REML=F)
+m.4.log <- lm(log(datenum) ~ CO2*Plant+Round + Chamber, data = ff)
 plot(simulationOutput <- simulateResiduals(fittedModel = m.4.log, plot = F))
-anova(m.4, m.4.log) # no difference, but log(datenum) with a substantially lower AIC.
 summary(m.4.log)
 anova(m.4.log)
+
+emm_model1 <- emmeans(m.4, pairwise ~ CO2|Plant)
+groups_emm_model1 <-cld(emm_model1, level = 0.05)
+summary(groups_emm_model1)
+pairs(emm_model1)
+
  
 # compare each plant species independently
 ## Borage
@@ -651,14 +661,20 @@ ggplot(area, aes(x=Plant, y = log(Mean), fill = CO2))+
                position=position_dodge(0.9))+
   labs(y = "ln(Flower diameter)")
 
+# convert to mean per plant
+area.means <- area %>% group_by(PlantID, CO2, Round, Chamber, Plant) %>%
+  summarise(mean = mean(Mean))
 
 ## Compare all plant species together
-m.B1 <- lmer(Mean ~ CO2*Plant + Round + (1|Chamber), data = area, REML=F)
-plot(simulationOutput <- simulateResiduals(fittedModel = m.B1, plot = F))
-m.B2 <- lmer(log(Mean) ~ CO2*Plant + Round + (1|Chamber), data = area, REML=F)
+m.B2 <- lm(log(mean) ~ CO2*Plant + Round + Chamber, data = area.means)
 plot(simulationOutput <- simulateResiduals(fittedModel = m.B2, plot = F))
-anova(m.B1, m.B2) # no difference, but log-transformed has lower AIC
+anova(m.B2) # no difference, but log-transformed has lower AIC
 summary(m.B2)
+
+emm_model1 <- emmeans(m.B2, pairwise ~ CO2|Plant)
+groups_emm_model1 <-cld(emm_model1, level = 0.05)
+summary(groups_emm_model1)
+pairs(emm_model1)
 
 # compare each plant species separately
 ## Borage
