@@ -638,8 +638,11 @@ summary(m.B2)
 W.area <- W.area %>% filter(!is.na(Plant))
 # remove any plant, date, round, chambers w/o 3+ observations
 area <- W.area %>% group_by(Plant, CO2) %>% filter(n()>2) %>% ungroup()
+# convert to mean per plant
+area.means <- area %>% group_by(PlantID, CO2, Round, Chamber, Plant) %>%
+  summarise(mean = mean(Mean))
 
-ggplot(area, aes(x=Plant, y = log(Mean), fill = CO2))+
+ggplot(area.means, aes(x=Plant, y = log(mean), fill = CO2))+
   geom_violin()+
   geom_point(position=position_jitterdodge(), size = 0.3, alpha = 0.3, aes(color=CO2))+
   theme_classic()+
@@ -660,10 +663,6 @@ ggplot(area, aes(x=Plant, y = log(Mean), fill = CO2))+
                width=.75,
                position=position_dodge(0.9))+
   labs(y = "ln(Flower diameter)")
-
-# convert to mean per plant
-area.means <- area %>% group_by(PlantID, CO2, Round, Chamber, Plant) %>%
-  summarise(mean = mean(Mean))
 
 ## Compare all plant species together
 m.B2 <- lm(log(mean) ~ CO2*Plant + Round + Chamber, data = area.means)
