@@ -65,6 +65,7 @@ ggplot(data.1, aes(x = PC1, y = PC2, colour = CO2.treatment, shape = species))+
   labs(y = "PC2 (20.5%)", x = "PC1 (53.8%)")
 
 #Test whether CO2 and/or plant species were significant predictors of secondary metabolomics
+# because split out by round, no need to include chamber (redundant)
 model <- manova(cbind(PC1, PC2)~CO2.treatment*species, data = data.1)
 summary(model)
 # both CO2 and species were significant predictors of secondary chemistry but no interaction between the two
@@ -84,7 +85,7 @@ d1.sf <- data.1 %>% filter(species == "sunflower")
 model.sf <- manova(cbind(PC1, PC2)~CO2.treatment, data = d1.sf)
 summary(model.sf) # not significant
 
-# bonferroni correction not necessary - nothing significant in round 1
+# nothing significant in round 1
 
 ## Round 2 
 #Get list of columns with reasonable data representation across species
@@ -137,10 +138,10 @@ data$Round <- as.factor(data$Round)
 # caffeine
 # filter out caffeine samples, and then only keep samples with 3+ per plant, co2 treatment, and round
 caf <- data %>% filter(Caffeine != "NaN")
-caf <- caf %>% group_by(species, Round, CO2.treatment) %>% filter(n()>2) %>% ungroup()
+caf <- caf %>% group_by(species, Round, CO2.treatment, Chamber) %>% filter(n()>2) %>% ungroup()
 caf$Caffeine <- as.numeric(caf$Caffeine)
 # analyze data and test fit 
-m.caf <- lm(log(Caffeine)~CO2.treatment*species + Round, data = caf)
+m.caf <- lm(log(Caffeine)~CO2.treatment*species + Round + Chamber, data = caf)
 plot(simulationOutput <- simulateResiduals(fittedModel = m.caf, plot = F))
 anova(m.caf) # round and species significant
 
@@ -152,10 +153,10 @@ pairs(emm_model1)
 # chlorogenic acid
 # filter out chlorogenic acid samples, and then only keep samples with 3+ per plant, co2 treatment, and round
 cha <- data %>% filter(Chlorogenic.acid != "NaN")
-cha <- cha %>% group_by(species, Round, CO2.treatment) %>% filter(n()>2) %>% ungroup()
+cha <- cha %>% group_by(species, Round, CO2.treatment, Chamber) %>% filter(n()>2) %>% ungroup()
 cha$Chlorogenic.acid <- as.numeric(cha$Chlorogenic.acid)
 # analyze data and test fit 
-m.cha <- lm(log(Chlorogenic.acid)~CO2.treatment*species + Round, data = cha)
+m.cha <- lm(log(Chlorogenic.acid)~CO2.treatment*species + Round + Chamber, data = cha)
 plot(simulationOutput <- simulateResiduals(fittedModel = m.cha, plot = F))
 anova(m.cha) # round and species, co2 x species significant
 
@@ -164,30 +165,13 @@ groups_emm_model1 <-cld(emm_model1, level = 0.05)
 summary(groups_emm_model1)
 pairs(emm_model1)
 
-# investigate CO2 x species independently
-# buckwheat
-cha.bw <- cha %>% filter(species == "buckwheat")
-m.cha.bw <- lm(log(Chlorogenic.acid) ~ CO2.treatment + Round, data = cha.bw)
-plot(simulationOutput <- simulateResiduals(fittedModel = m.cha.bw, plot = F))
-anova(m.cha.bw) # co2 significant
-
-# sunflower
-cha.sf <- cha %>% filter(species == "sunflower")
-m.cha.sf <- lm(log(Chlorogenic.acid) ~ CO2.treatment + Round, data = cha.sf)
-plot(simulationOutput <- simulateResiduals(fittedModel = m.cha.sf, plot = F))
-anova(m.cha.sf) # round significant
-
-# tomato
-cha.t <- cha %>% filter(species == "tomato") # only from round 1
-t.test(Chlorogenic.acid ~ CO2.treatment, data = cha.t) # not significant. 
-
 # cinnamic acid
 # filter out cinnamic acid samples, and then only keep samples with 3+ per plant, co2 treatment, and round
 cma <- data %>% filter(Cinnamic.acid != "NaN")
-cma <- cma %>% group_by(species, Round, CO2.treatment) %>% filter(n()>2) %>% ungroup()
+cma <- cma %>% group_by(species, Round, CO2.treatment, Chamber) %>% filter(n()>2) %>% ungroup()
 cma$Cinnamic.acid <- as.numeric(cma$Cinnamic.acid)
 # analyze data and test fit 
-m.cma <- lm(log(Cinnamic.acid)~CO2.treatment*species + Round, data = cma)
+m.cma <- lm(log(Cinnamic.acid)~CO2.treatment*species + Round + Chamber, data = cma)
 plot(simulationOutput <- simulateResiduals(fittedModel = m.cma, plot = F))
 anova(m.cma) # round and species, co2 x species significant
 
@@ -204,6 +188,7 @@ eug <- eug %>% filter(species != "sunflower")
 eug$Eugenol <- as.numeric(eug$Eugenol)
 # analyze data and test fit 
 m.eug <- lm(Eugenol~CO2.treatment*species, data = eug) # not enough data from both rounds to include in model
+# Chamber the same as CO2 treatment for eugenol, so left out of model (redundant)
 plot(simulationOutput <- simulateResiduals(fittedModel = m.eug, plot = F))
 anova(m.eug) # nothing significant
 
@@ -215,10 +200,10 @@ pairs(emm_model1)
 # gallic acid
 # filter out gallic acid samples, and then only keep samples with 3+ per plant, co2 treatment, and round
 gal <- data %>% filter(Gallic.acid != "NaN")
-gal <- gal %>% group_by(species, Round, CO2.treatment) %>% filter(n()>2) %>% ungroup()
+gal <- gal %>% group_by(species, Round, CO2.treatment, Chamber) %>% filter(n()>2) %>% ungroup()
 gal$Gallic.acid <- as.numeric(gal$Gallic.acid)
 # analyze data and test fit 
-m.gal <- lm(Gallic.acid~CO2.treatment*species + Round, data = gal) 
+m.gal <- lm(Gallic.acid~CO2.treatment*species + Round + Chamber, data = gal) 
 plot(simulationOutput <- simulateResiduals(fittedModel = m.gal, plot = F))
 anova(m.gal) # round and species significant
 
@@ -230,10 +215,10 @@ pairs(emm_model1)
 # kaempferol
 # filter out kaempferol samples, and then only keep samples with 3+ per plant, co2 treatment, and round
 kae <- data %>% filter(Kaempferol != "NaN")
-kae <- kae %>% group_by(species, Round, CO2.treatment) %>% filter(n()>2) %>% ungroup()
+kae <- kae %>% group_by(species, Round, CO2.treatment, Chamber) %>% filter(n()>2) %>% ungroup()
 kae$Kaempferol <- as.numeric(kae$Kaempferol)
 # analyze data and test fit 
-m.kae <- lm(log(Kaempferol)~CO2.treatment*species + Round, data = kae) 
+m.kae <- lm(log(Kaempferol)~CO2.treatment*species + Round  + Chamber, data = kae) 
 plot(simulationOutput <- simulateResiduals(fittedModel = m.kae, plot = F))
 anova(m.kae) # round and species, co2 x species significant
 
@@ -253,10 +238,10 @@ t.test(Nicotine~CO2.treatment, data = nic) # no significant difference.
 # p-coumaric acid
 # filter out p-coumaric acid samples, and then only keep samples with 3+ per plant, co2 treatment, and round
 pc.a <- data %>% filter(P.coumaric.acid != "NaN")
-pc.a <- pc.a %>% group_by(species, Round, CO2.treatment) %>% filter(n()>2) %>% ungroup()
+pc.a <- pc.a %>% group_by(species, Round, CO2.treatment, Chamber) %>% filter(n()>2) %>% ungroup()
 pc.a$P.coumaric.acid <- as.numeric(pc.a$P.coumaric.acid)
 # analyze data and test fit 
-m.pc.a <- lm(log(P.coumaric.acid)~CO2.treatment*species + Round, data = pc.a) 
+m.pc.a <- lm(log(P.coumaric.acid)~CO2.treatment*species + Round + Chamber, data = pc.a) 
 plot(simulationOutput <- simulateResiduals(fittedModel = m.pc.a, plot = F))
 anova(m.pc.a) # round and species
 
@@ -268,10 +253,10 @@ pairs(emm_model1)
 # quercetin
 # filter out quercetin samples, and then only keep samples with 3+ per plant, co2 treatment, and round
 que <- data %>% filter(Quercitin != "NaN")
-que <- que %>% group_by(species, Round, CO2.treatment) %>% filter(n()>2) %>% ungroup()
+que <- que %>% group_by(species, Round, CO2.treatment, Chamber) %>% filter(n()>2) %>% ungroup()
 que$Quercitin <- as.numeric(que$Quercitin)
 # analyze data and test fit 
-m.que <- lm(log(Quercitin)~CO2.treatment*species + Round, data = que) 
+m.que <- lm(log(Quercitin)~CO2.treatment*species + Round + Chamber, data = que) 
 plot(simulationOutput <- simulateResiduals(fittedModel = m.que, plot = F))
 anova(m.que) # round and species
 
@@ -279,24 +264,4 @@ emm_model1 <- emmeans(m.que, pairwise ~ CO2.treatment|species)
 groups_emm_model1 <-cld(emm_model1, level = 0.05)
 summary(groups_emm_model1)
 pairs(emm_model1)
-
-# compare each species separately
-# buckwheat
-que.bw <- que %>% filter(species == "buckwheat")
-m.que.bw <- lm(Quercitin ~ CO2.treatment + Round, data = que.bw)
-plot(simulationOutput <- simulateResiduals(fittedModel = m.que.bw, plot = F))
-anova(m.que.bw) # co2 significant
-
-# poppy
-que.p <- que %>% filter(species == "poppy") # only round 1 data
-t.test(Quercitin ~ CO2.treatment, data = que.p) # significant effect of CO2 - eCO2 increased Quercitin
-
-# squash
-que.sq <- que %>% filter(species == "squash") # only round 1 data
-t.test(Quercitin ~ CO2.treatment, data = que.sq) # not significant
- 
-# sunflower
-que.sf <- que %>% filter(species == "sunflower") # only round 1 data
-t.test(Quercitin ~ CO2.treatment, data = que.sf) # not significant
-
 
