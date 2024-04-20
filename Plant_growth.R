@@ -86,7 +86,7 @@ height$CO2 <- as.factor(height$CO2)
 # plot height by week by CO2 treatments
 ggplot(height, aes(x=datenum, y = Height_cm, color = CO2))+
   geom_point(aes(color = CO2), alpha = 0.4, size = 0.5)+
-  geom_smooth(method = "loess", aes(fill = CO2))+
+  geom_smooth(method = "lm", aes(fill = CO2))+
   theme_classic()+
   theme(legend.position = "bottom")+
   labs(y="Height (cm) +/- se", x = "Weeks since planting")+
@@ -114,121 +114,21 @@ groups_emm_model1 <-cld(emm_model1, level = 0.05)
 summary(groups_emm_model1)
 pairs(emm_model1)
 
-# compare each individual plant species separately
-## Borage
-h.B <- height %>% filter(Plant == "B")
-m.B1 <- lmer(Height_cm ~ CO2 + Round + week + (1|Chamber), data = h.B, REML=F)
-plot(simulationOutput <- simulateResiduals(fittedModel=m.B1, plot =F))
-
-# try ln-transforming height data
-m.B1.log <- lmer(log(Height_cm) ~ CO2 + Round + week + (1|Chamber), data = h.B, REML=F)
-plot(simulationOutput <- simulateResiduals(fittedModel=m.B1.log, plot =F))
-
-anova(m.B1, m.B1.log) 
-summary(m.B1.log) # No significant difference by CO2 
-
-## Buckwheat
-h.BW <- height %>% filter(Plant == "BW")
-m.BW1 <- lmer(Height_cm ~ CO2 + Round + week + (1|Chamber), data = h.BW, REML=F)
-plot(simulationOutput <- simulateResiduals(fittedModel=m.BW1, plot =F))
-
-# try ln-transforming height data
-m.BW1.log <- lmer(log(Height_cm) ~ CO2 + Round + week + (1|Chamber), data = h.BW, REML=F)
-plot(simulationOutput <- simulateResiduals(fittedModel=m.BW1.log, plot =F))
-anova(m.BW1, m.BW1.log) 
-summary(m.BW1.log) # CO2 is significant
-
+# predict changes in height at week 10 for plants with significant height response to co2 treatment
 # Make predictions using fixed effect only and then compare differences at week 10
-pred.h.BW <- h.BW %>% 
-  mutate(pred_fixef = predict(m.BW1.log, newdata = ., re.form = NA),
-         pred_ranef = predict(m.BW1.log, newdata = ., re.form = NA))
+pred.h <- height %>% 
+  mutate(pred_fixef = predict(m.1, newdata = ., re.form = NA),
+         pred_ranef = predict(m.1, newdata = ., re.form = NA))
 
-pred.h.BW$pred_fixef_cm <- exp(pred.h.BW$pred_fixef)
+pred.h$pred_fixef_cm <- exp(pred.h$pred_fixef)
 
-pred.h.BW.sum <- pred.h.BW %>% group_by(CO2, week) %>%
+pred.h.sum <- pred.h %>% group_by(Plant, CO2, week) %>%
   dplyr::summarise(
     count = n(),
     mean = mean(pred_fixef_cm, na.rm = T),
     sd = sd(pred_fixef_cm, na.rm = T)
   )
-pred.h.BW.sum$se <- pred.h.BW.sum$sd/sqrt(pred.h.BW.sum$count)
-
-## Clover
-h.C <- height %>% filter(Plant == "C")
-m.C1 <- lmer(Height_cm ~ CO2 + Round + week + (1|Chamber), data = h.C, REML=F)
-plot(simulationOutput <- simulateResiduals(fittedModel=m.C1, plot =F))
-m.C1.log <- lmer(log(Height_cm) ~ CO2 + Round + week + (1|Chamber), data = h.C, REML=F)
-plot(simulationOutput <- simulateResiduals(fittedModel=m.C1.log, plot =F))
-anova(m.C1, m.C1.log) 
-summary(m.C1.log) # no significant effect of round or of CO2 
-
-# what if we remove round from the model
-m.C1.log1 <- lmer(log(Height_cm) ~ CO2 + week + (1|Chamber), data = h.C, REML=F)
-plot(simulationOutput <- simulateResiduals(fittedModel=m.C1.log1, plot =F))
-anova(m.C1.log, m.C1.log1) 
-summary(m.C1.log1) # CO2 not significant 
-
-## Dandelion
-h.D <- height %>% filter(Plant == "D")
-h.D <- h.D %>% filter(Round == "1") # Remove round 2 dandelion starts, flowering took took too long to continue in round 2
-
-m.D1 <- lmer(Height_cm ~ CO2 + week + (1|Chamber), data = h.D, REML=F)
-plot(simulationOutput <- simulateResiduals(fittedModel=m.D1, plot =F))
-m.D1.log <- lmer(log(Height_cm) ~ CO2 + week + (1|Chamber), data = h.D, REML=F)
-plot(simulationOutput <- simulateResiduals(fittedModel=m.D1.log, plot =F))
-anova(m.D1, m.D1.log) 
-summary(m.D1.log) # No significant difference by CO2 level, only week
-
-## Lacy Phacelia
-h.LP <- height %>% filter(Plant == "LP")
-
-m.LP1 <- lmer(Height_cm ~ CO2 + Round + week + (1|Chamber), data = h.LP, REML=F)
-plot(simulationOutput <- simulateResiduals(fittedModel=m.LP1, plot =F))
-m.LP1.log <- lmer(log(Height_cm) ~ CO2 + Round + week + (1|Chamber), data = h.LP, REML=F)
-plot(simulationOutput <- simulateResiduals(fittedModel=m.LP1.log, plot =F))
-anova(m.LP1,m.LP1.log) 
-summary(m.LP1.log) # no significant effect of CO2 
-
-## Nasturtium
-h.N <- height %>% filter(Plant == "N")
-
-m.N1 <- lmer(Height_cm ~ CO2 + Round + week + (1|Chamber), data = h.N, REML=F)
-plot(simulationOutput <- simulateResiduals(fittedModel=m.N1, plot =F))
-m.N1.log <- lmer(log(Height_cm) ~ CO2 + Round + week + (1|Chamber), data = h.N, REML=F)
-plot(simulationOutput <- simulateResiduals(fittedModel=m.N1.log, plot =F))
-anova(m.N1, m.N1.log) 
-summary(m.N1.log)# No significant difference by CO2 level
-
-## Partridge pea
-h.PP <- height %>% filter(Plant == "PP")
-h.PP <- h.PP %>% filter(Round == "1") # high mortality in round 2, did not continue w/this plant in round 2
-
-m.PP1 <- lmer(Height_cm ~ CO2+week + (1|Chamber), data = h.PP, REML=F)
-plot(simulationOutput <- simulateResiduals(fittedModel=m.PP1, plot =F))
-m.PP1.log <- lmer(log(Height_cm) ~ CO2 + week + (1|Chamber), data = h.PP, REML=F)
-plot(simulationOutput <- simulateResiduals(fittedModel=m.PP1.log, plot =F))
-anova(m.PP1, m.PP1.log) 
-summary(m.PP1.log) # only week is significant
-
-## Sweet alyssum
-h.SA <- height %>% filter(Plant == "SA")
-
-m.SA1 <- lmer(Height_cm ~ CO2 + Round+ week + (1|Chamber), data = h.SA, REML=F)
-plot(simulationOutput <- simulateResiduals(fittedModel=m.SA1, plot =F))
-m.SA1.log <- lmer(log(Height_cm) ~ CO2 + Round + week + (1|Chamber), data = h.SA, REML=F)
-plot(simulationOutput <- simulateResiduals(fittedModel=m.SA1.log, plot =F))
-anova(m.SA1, m.SA1.log) 
-summary(m.SA1.log) # No significant difference by CO2 level, only round and date
-
-## Sunflower 
-h.SF <- height %>% filter(Plant == "SF")
-
-m.SF1 <- lmer(Height_cm ~ CO2 + Round + week + (1|Chamber), data = h.SF, REML=F)
-plot(simulationOutput <- simulateResiduals(fittedModel=m.SF1, plot =F))
-m.SF1.log <- lmer(log(Height_cm) ~ CO2 + Round + week + (1|Chamber), data = h.SF, REML=F)
-plot(simulationOutput <- simulateResiduals(fittedModel=m.SF1.log, plot =F))
-anova(m.SF1, m.SF1.log)
-summary(m.SF1.log) # No significant difference by CO2 level, only round and date
+pred.h.sum$se <- pred.h.sum$sd/sqrt(pred.h.sum$count)
 
 ##############
 ## leaves
@@ -241,7 +141,7 @@ names(plants.leaves) <- c("B", "BW", "C", "D", "LP", "N", "PP", "SA", "SF")
 
 ggplot(leaves, aes(x=datenum, y = Leaf_no, color = CO2))+
   geom_point(aes(color = CO2), alpha = 0.4, size = 0.5)+
-  geom_smooth(method = "loess", aes(fill = CO2))+
+  geom_smooth(method = "lm", aes(fill = CO2))+
   theme_classic()+
   theme(legend.position = "bottom")+
   labs(y="Leaf # +/- se", x = "Weeks since planting")+
@@ -268,127 +168,20 @@ groups_emm_model1 <-cld(emm_model1, level = 0.05)
 summary(groups_emm_model1)
 pairs(emm_model1)
 
-## Borage
-l.B <- leaves %>% filter(Plant == "B")
+## predict leaves at week 10
+pred.l <- leaves %>% 
+  mutate(pred_fixef = predict(m.B1.log, newdata = ., re.form = NA),
+         pred_ranef = predict(m.B1.log, newdata = ., re.form = NA))
 
-m.B1 <- lmer(Leaf_no ~ CO2 + Round + week + (1|Chamber), data = l.B, REML=F)
-plot(simulationOutput <- simulateResiduals(fittedModel=m.B1, plot =F))
-m.B1.log <- lmer(log(Leaf_no) ~ CO2 + Round + week + (1|Chamber), data = l.B, REML=F)
-plot(simulationOutput <- simulateResiduals(fittedModel=m.B1.log, plot =F))
-anova(m.B1, m.B1.log)
-summary(m.B1.log) # round not significant, compare w/o round
+pred.l$pred_fixef_cm <- exp(pred.l$pred_fixef)
 
-m.B1.log2 <- lmer(log(Leaf_no) ~CO2 + week + (1|Chamber), data = l.B, REML = F)
-plot(simulationOutput <- simulateResiduals(fittedModel=m.B1.log2, plot =F))
-anova(m.B1.log, m.B1.log2)  
-summary(m.B1.log2) # No significant difference by CO2 level, only week
-
-## Buckwheat
-l.BW <- leaves %>% filter(Plant == "BW")
-
-m.BW1 <- lmer(Leaf_no ~ CO2 + Round + week + (1|Chamber), data = l.BW, REML=F)
-plot(simulationOutput <- simulateResiduals(fittedModel=m.BW1, plot =F))
-m.BW1.log <- lmer(log(Leaf_no) ~ CO2 + Round + week + (1|Chamber), data = l.BW, REML=F)
-plot(simulationOutput <- simulateResiduals(fittedModel=m.BW1.log, plot =F))
-anova(m.BW1, m.BW1.log) 
-summary(m.BW1.log) # no effect of CO2
-
-## Clover
-l.C <- leaves %>% filter(Plant == "C")
-
-m.C1 <- lmer(Leaf_no ~ CO2 + Round + week + (1|Chamber), data = l.C, REML=F)
-plot(simulationOutput <- simulateResiduals(fittedModel=m.C1, plot =F))
-m.C1.log <- lmer(log(Leaf_no) ~ CO2 + Round + week + (1|Chamber), data = l.C, REML=F)
-plot(simulationOutput <- simulateResiduals(fittedModel=m.C1.log, plot =F))
-anova(m.C1, m.C1.log) 
-summary(m.C1.log) # CO2 not significant 
-
-## Dandelion
-l.D <- leaves %>% filter(Plant == "D")
-l.D <- l.D %>% filter(Round == "1") # only had plants in round 1
-
-m.D1 <- lmer(Leaf_no ~ CO2 + week + (1|Chamber), data = l.D, REML=F)
-plot(simulationOutput <- simulateResiduals(fittedModel=m.D1, plot =F))
-m.D1.log <- lmer(log(Leaf_no) ~ CO2 + week + (1|Chamber), data = l.D, REML=F)
-plot(simulationOutput <- simulateResiduals(fittedModel=m.D1.log, plot =F))
-anova(m.D1, m.D1.log) 
-summary(m.D1.log) # week significant
-
-## Lacy Phacelia
-l.LP <- leaves %>% filter(Plant == "LP")
-
-m.LP1 <- lmer(Leaf_no ~ CO2 + Round + week + (1|Chamber), data = l.LP, REML=F)
-plot(simulationOutput <- simulateResiduals(fittedModel=m.LP1, plot =F))
-m.LP1.log <- lmer(log(Leaf_no) ~ CO2 + Round + week + (1|Chamber), data = l.LP, REML=F)
-plot(simulationOutput <- simulateResiduals(fittedModel=m.LP1.log, plot =F))
-anova(m.LP1, m.LP1.log) 
-summary(m.LP1.log) # round not significant compare models w/o round
-
-m.LP1.log2 <- lmer(log(Leaf_no) ~ CO2 + week + (1|Chamber), data = l.LP, REML=F)
-plot(simulationOutput <- simulateResiduals(fittedModel=m.LP1.log2, plot =F))
-anova(m.LP1.log2, m.LP1.log) #AIC is 0.1 less without Round. Going to leave it as is for now. 
-
-## Nasturtium
-l.N <- leaves %>% filter(Plant == "N")
-
-m.N1 <- lmer(Leaf_no ~ CO2+Round+week + (1|Chamber), data = l.N, REML=F)
-plot(simulationOutput <- simulateResiduals(fittedModel=m.N1, plot =F))
-m.N1.log <- lmer(log(Leaf_no) ~ CO2+Round+week + (1|Chamber), data = l.N, REML=F)
-plot(simulationOutput <- simulateResiduals(fittedModel=m.N1.log, plot =F))
-anova(m.N1, m.N1.log) 
-summary(m.N1.log) # Co2, week significant
-
-# Make predictions using fixed effect only and then random effects and plot the results
-pred.l.N <- l.N %>% 
-  mutate(pred_fixef = predict(m.N1.log, newdata = ., re.form = NA),
-         pred_ranef = predict(m.N1.log, newdata = ., re.form = NA))
-
-pred.l.N$pred_fixef_leaf <- exp(pred.l.N$pred_fixef)
-
-pred.l.N.sum <- pred.l.N %>% group_by(CO2, week) %>%
+pred.l.sum <- pred.l %>% group_by(Plant, CO2, week) %>%
   dplyr::summarise(
     count = n(),
-    mean = mean(pred_fixef_leaf, na.rm = T),
-    sd = sd(pred_fixef_leaf, na.rm = T)
+    mean = mean(pred_fixef_cm, na.rm = T),
+    sd = sd(pred_fixef_cm, na.rm = T)
   )
-pred.l.N.sum$se <- pred.l.N.sum$sd/sqrt(pred.l.N.sum$count)
-
-# try without round
-m.N1.log2 <- lmer(log(Leaf_no) ~ CO2+week + (1|Chamber), data = l.N, REML=F)
-plot(simulationOutput <- simulateResiduals(fittedModel=m.N1.log2, plot =F))
-anova(m.N1.log2, m.N1.log) 
-summary(m.N1.log2)
-
-## Partridge Pea
-l.PP <- leaves %>% filter(Plant == "PP")
-l.PP <- l.PP %>% filter(Round == "1") # only had plants in round 1
-
-m.PP1 <- lmer(Leaf_no ~ CO2 + week + (1|Chamber), data = l.PP, REML=F)
-plot(simulationOutput <- simulateResiduals(fittedModel=m.PP1, plot =F))
-m.PP1.log <- lmer(log(Leaf_no) ~ CO2 + week + (1|Chamber), data = l.PP, REML=F)
-plot(simulationOutput <- simulateResiduals(fittedModel=m.PP1.log, plot =F))
-anova(m.PP1, m.PP1.log) 
-summary(m.PP1.log) # co2 not significant 
-
-## Sweet alyssum 
-l.SA <- leaves %>% filter(Plant == "SA")
-
-m.SA1 <- lmer(Leaf_no ~ CO2+Round+week + (1|Chamber), data = l.SA, REML=F)
-plot(simulationOutput <- simulateResiduals(fittedModel=m.SA1, plot =F))
-m.SA1.log <- lmer(log(Leaf_no) ~ CO2+Round+week + (1|Chamber), data = l.SA, REML=F)
-plot(simulationOutput <- simulateResiduals(fittedModel=m.SA1.log, plot =F))
-anova(m.SA1, m.SA1.log) 
-summary(m.SA1.log) # No significant difference by CO2 level
-
-## Sunflower
-l.SF <- leaves %>% filter(Plant == "SF")
-
-m.SF1 <- lmer(Leaf_no ~ CO2+Round+week + (1|Chamber), data = l.SF, REML=F)
-plot(simulationOutput <- simulateResiduals(fittedModel=m.SF1, plot =F))
-m.SF1.log <- lmer(log(Leaf_no) ~ CO2+Round+week + (1|Chamber), data = l.SF, REML=F)
-plot(simulationOutput <- simulateResiduals(fittedModel=m.SF1.log, plot =F))
-anova(m.SF1, m.SF1.log) 
-summary(m.SF1.log) # CO2 not significant
+pred.l.sum$se <- pred.l.sum$sd/sqrt(pred.l.sum$count)
 
 ###################
 ## flowers
@@ -405,7 +198,7 @@ flowers$CO2 <- as.factor(flowers$CO2)
 
 # plot flowers
 ggplot(flowers, aes(x=week, y = Flower_no, color = CO2))+
-  geom_smooth(method = "loess", aes(fill = CO2))+
+  geom_smooth(method = "lm", aes(fill = CO2))+
   theme_classic()+
   geom_point(aes(color = CO2), alpha = 0.4, size = 0.5)+
   theme(legend.position = "bottom")+
