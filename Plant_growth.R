@@ -358,3 +358,11 @@ emm_model1 <- emmeans(m.B, pairwise ~ CO2|Plant)
 groups_emm_model1 <-cld(emm_model1, level = 0.05)
 summary(groups_emm_model1)
 pairs(emm_model1)
+
+######
+## compare crop vs. non-crop using fisher exact test
+crop <- c(2, 24) # variables that responded, variables that didn't
+non <- c(20, 50) # variables that responded, variables that didn't
+c <- as.data.frame(rbind(crop, non))
+
+fisher.test(c)
