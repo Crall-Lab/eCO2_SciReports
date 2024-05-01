@@ -34,6 +34,7 @@ biomass <- read.csv(file = "Biomass_exp2.csv", header = T, na.string = c("", "NU
 W.plant$Date <- as.Date(W.plant$Date, "%m/%d/%y")
 W.plant$Chamber <- factor(W.plant$Chamber, levels = c(60, 63, 62, 61))
 W.plant$Plant <- as.factor(W.plant$Plant)
+W.plant <- W.plant %>% filter(Plant_ID != "BW?")
 
 # set start planting date
 W.plant0 <- W.plant %>% group_by(Plant, Chamber, Round) %>% filter(n()>2) %>% ungroup()
@@ -105,11 +106,12 @@ ggplot(height, aes(x=datenum, y = Height_cm, color = CO2))+
 height$week <- height$datenum/7
 
 # full model
-m.1 <- lm(log(Height_cm) ~ CO2*Plant + Round + week + Chamber, data = height)
+m.1 <- lmer(log(Height_cm) ~ CO2*Plant + Round + week + Chamber + (1|UniqueID), data = height, REML = F)
 plot(simulationOutput <- simulateResiduals(fittedModel=m.1, plot =F))
 anova(m.1) 
+summary(m.1)
 
-emm_model1 <- emmeans(m.1, pairwise ~ CO2|Plant)
+emm_model1 <- emmeans(m.1, pairwise ~ CO2|Plant, pbkrtest.limit = 7000)
 groups_emm_model1 <-cld(emm_model1, level = 0.05)
 summary(groups_emm_model1)
 pairs(emm_model1)
@@ -215,7 +217,7 @@ ggplot(flowers, aes(x=week, y = Flower_no, color = CO2))+
 flowers.1 <- flowers %>% filter(week %in% c(1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17))
 
 # full model w/all plant species
-m.3 <- glmer.nb(Flower_no ~ CO2*Plant+Round+Chamber + (1|week),
+m.3 <- glmer.nb(Flower_no ~ CO2*Plant+UniqueID+Round+Chamber + (1|week),
                  data = flowers.1)
 plot(simulationOutput <- simulateResiduals(fittedModel=m.3, plot =F))
 car::Anova(m.3) # report this
