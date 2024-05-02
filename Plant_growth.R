@@ -216,8 +216,9 @@ ggplot(flowers, aes(x=week, y = Flower_no, color = CO2))+
              ncol = 3)
 
 # full model w/all plant species
-m.3 <- glmer.nb(Flower_no ~ CO2*Plant+UniqueID+Round+Chamber + (1|week),
-                 data = flowers.1)
+m.3 <- glmer.nb(Flower_no ~ CO2*Plant+Round+Chamber + (1|UniqueID) + (1|week),
+                data = flowers.1,
+                glmerControl(optimizer = "bobyqa", optCtrl = list(maxfun = 100000)))
 plot(simulationOutput <- simulateResiduals(fittedModel=m.3, plot =F))
 car::Anova(m.3) # report this
 
