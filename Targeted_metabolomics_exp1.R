@@ -144,6 +144,7 @@ caf$Caffeine <- as.numeric(caf$Caffeine)
 m.caf <- lm(log(Caffeine)~CO2.treatment*species + Round + Chamber, data = caf)
 plot(simulationOutput <- simulateResiduals(fittedModel = m.caf, plot = F))
 anova(m.caf) # round and species significant
+summary(m.caf)
 
 emm_model1 <- emmeans(m.caf, pairwise ~ CO2.treatment|species)
 groups_emm_model1 <-cld(emm_model1, level = 0.05)
@@ -159,6 +160,7 @@ cha$Chlorogenic.acid <- as.numeric(cha$Chlorogenic.acid)
 m.cha <- lm(log(Chlorogenic.acid)~CO2.treatment*species + Round + Chamber, data = cha)
 plot(simulationOutput <- simulateResiduals(fittedModel = m.cha, plot = F))
 anova(m.cha) # round and species, co2 x species significant
+summary(m.cha)
 
 emm_model1 <- emmeans(m.cha, pairwise ~ CO2.treatment|species)
 groups_emm_model1 <-cld(emm_model1, level = 0.05)
@@ -174,6 +176,7 @@ cma$Cinnamic.acid <- as.numeric(cma$Cinnamic.acid)
 m.cma <- lm(log(Cinnamic.acid)~CO2.treatment*species + Round + Chamber, data = cma)
 plot(simulationOutput <- simulateResiduals(fittedModel = m.cma, plot = F))
 anova(m.cma) # round and species, co2 x species significant
+summary(m.cma)
 
 emm_model1 <- emmeans(m.cma, pairwise ~ CO2.treatment|species)
 groups_emm_model1 <-cld(emm_model1, level = 0.05)
@@ -191,6 +194,7 @@ m.eug <- lm(Eugenol~CO2.treatment*species, data = eug) # not enough data from bo
 # Chamber the same as CO2 treatment for eugenol, so left out of model (redundant)
 plot(simulationOutput <- simulateResiduals(fittedModel = m.eug, plot = F))
 anova(m.eug) # nothing significant
+summary(m.eug)
 
 emm_model1 <- emmeans(m.eug, pairwise ~ CO2.treatment|species)
 groups_emm_model1 <-cld(emm_model1, level = 0.05)
@@ -206,6 +210,7 @@ gal$Gallic.acid <- as.numeric(gal$Gallic.acid)
 m.gal <- lm(Gallic.acid~CO2.treatment*species + Round + Chamber, data = gal) 
 plot(simulationOutput <- simulateResiduals(fittedModel = m.gal, plot = F))
 anova(m.gal) # round and species significant
+summary(m.gal)
 
 emm_model1 <- emmeans(m.gal, pairwise ~ CO2.treatment|species)
 groups_emm_model1 <-cld(emm_model1, level = 0.05)
@@ -221,6 +226,7 @@ kae$Kaempferol <- as.numeric(kae$Kaempferol)
 m.kae <- lm(log(Kaempferol)~CO2.treatment*species + Round  + Chamber, data = kae) 
 plot(simulationOutput <- simulateResiduals(fittedModel = m.kae, plot = F))
 anova(m.kae) # round and species, co2 x species significant
+summary(m.kae)
 
 emm_model1 <- emmeans(m.kae, pairwise ~ CO2.treatment|species)
 groups_emm_model1 <-cld(emm_model1, level = 0.05)
@@ -244,6 +250,7 @@ pc.a$P.coumaric.acid <- as.numeric(pc.a$P.coumaric.acid)
 m.pc.a <- lm(log(P.coumaric.acid)~CO2.treatment*species + Round + Chamber, data = pc.a) 
 plot(simulationOutput <- simulateResiduals(fittedModel = m.pc.a, plot = F))
 anova(m.pc.a) # round and species
+summary(m.pc.a)
 
 emm_model1 <- emmeans(m.pc.a, pairwise ~ CO2.treatment|species)
 groups_emm_model1 <-cld(emm_model1, level = 0.05)
@@ -259,6 +266,7 @@ que$Quercitin <- as.numeric(que$Quercitin)
 m.que <- lm(log(Quercitin)~CO2.treatment*species + Round + Chamber, data = que) 
 plot(simulationOutput <- simulateResiduals(fittedModel = m.que, plot = F))
 anova(m.que) # round and species
+summary(m.que)
 
 emm_model1 <- emmeans(m.que, pairwise ~ CO2.treatment|species)
 groups_emm_model1 <-cld(emm_model1, level = 0.05)
