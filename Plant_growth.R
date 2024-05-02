@@ -161,11 +161,12 @@ ggplot(leaves, aes(x=datenum, y = Leaf_no, color = CO2))+
 leaves$week <- leaves$datenum/7
 
 # full model looking at leaf number, week, plant species, and CO2 treament 
-m.B1.log <- lm(log(Leaf_no) ~ CO2*Plant + Round + week + Chamber, data = leaves)
+m.B1.log <- lmer(log(Leaf_no) ~ CO2*Plant + Round + week + Chamber + (1|UniqueID), data = leaves)
 plot(simulationOutput <- simulateResiduals(fittedModel=m.B1.log, plot =F))
 anova(m.B1.log) # CO2 not significant, but Plant species and Co2 x Plant species, so compare each species alone
+summary(m.B1.log)
 
-emm_model1 <- emmeans(m.B1.log, pairwise ~ CO2|Plant)
+emm_model1 <- emmeans(m.B1.log, pairwise ~ CO2|Plant, pbkrtest.limit = 7000)
 groups_emm_model1 <-cld(emm_model1, level = 0.05)
 summary(groups_emm_model1)
 pairs(emm_model1)
@@ -203,18 +204,16 @@ ggplot(flowers, aes(x=week, y = Flower_no, color = CO2))+
   geom_smooth(method = "lm", aes(fill = CO2))+
   theme_classic()+
   geom_point(aes(color = CO2), alpha = 0.4, size = 0.5)+
-  theme(legend.position = "bottom")+
+  theme(legend.position = "none")+
   labs(y="Flowers +/- se", x = "Weeks since planting")+
   scale_fill_manual(values = c("black", "#6c6cff"))+
   scale_color_manual(values = c("grey", "cornflowerblue"), 
                      labels = c("aCO2", "eCO2"),
                      name = "Treatment")+
+  scale_y_continuous(limits = c(0 ,NA))+
   facet_wrap(vars(Plant), scales = "free",
              labeller = labeller(Plant = plants.flowers),
              ncol = 3)
-
-# round date to nearest week
-flowers.1 <- flowers %>% filter(week %in% c(1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17))
 
 # full model w/all plant species
 m.3 <- glmer.nb(Flower_no ~ CO2*Plant+UniqueID+Round+Chamber + (1|week),
