@@ -216,32 +216,16 @@ ggplot(flowers, aes(x=week, y = Flower_no, color = CO2))+
              ncol = 3)
 
 # full model w/all plant species
-m.3 <- glmer.nb(Flower_no ~ CO2*Plant+Round+Chamber + (1|UniqueID) + (1|week),
+m.3 <- glmer.nb(Flower_no ~ CO2*Plant+Round+Chamber + (1|week),
                 data = flowers.1,
                 glmerControl(optimizer = "bobyqa", optCtrl = list(maxfun = 2e5)))
 
-
-# rescale and center continuous parameters
-numcols <- grep("^c\\.", names(flowers.1))
-dfs <- flowers.1
-dfs[,numcols] <- scale(dfs[,numcols])
-m1_sc <- update(m.3, data = dfs)
-
-anova(m.3, m1_sc)
-car::Anova(m.3)
-car::Anova(m1_sc) # ok findings between models are not different
-AIC(m.3)
-AIC(m1_sc) # 0.01 improvement on AIC
-
-# check singularity
-tt <- getME(m1_sc,"theta")
-ll <- getME(m1_sc,"lower")
-min(tt[ll==0])
-
+# this model didn't converge so we removed individual plant ID as a random effect
 plot(simulationOutput <- simulateResiduals(fittedModel=m.3, plot =F))
 car::Anova(m.3) # report this
+summary(m.3)
 
-emm_model1 <- emmeans(m.3, pairwise ~ CO2|Plant)
+emm_model1 <- emmeans(m.3, pairwise ~ CO2|Plant, pbkrtest.limit = 70000)
 groups_emm_model1 <-cld(emm_model1, level = 0.05)
 summary(groups_emm_model1)
 pairs(emm_model1)
@@ -383,7 +367,7 @@ pairs(emm_model1)
 ######
 ## compare crop vs. non-crop using fisher exact test
 crop <- c(2, 24) # variables that responded, variables that didn't
-non <- c(20, 50) # variables that responded, variables that didn't
+non <- c(15, 55) # variables that responded, variables that didn't
 c <- as.data.frame(rbind(crop, non))
 
 fisher.test(c)
